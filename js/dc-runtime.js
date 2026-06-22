@@ -211,6 +211,49 @@
   }
 
   /* ---------- dc-import ---------- */
+  // Put the dc-import tag's own style/class onto the component's root node.
+  function applyExtra(rendered, extraStyle, extraClass) {
+    for (var r = 0; r < rendered.length; r++) {
+      var rn = rendered[r];
+      if (rn.nodeType === 1) {
+        if (extraStyle != null) {
+          var cur = rn.getAttribute("style") || "";
+          rn.setAttribute("style", cur ? (cur + ";" + extraStyle) : extraStyle);
+        }
+        if (extraClass != null) rn.setAttribute("class", ((rn.getAttribute("class") || "") + " " + extraClass).trim());
+        break;
+      }
+    }
+  }
+
+  // Re-render a stateful instance's template into its own host element.
+  // Because the host is a stable DOM node, a stateful component (PlayerPicker)
+  // can update *in isolation* on its own setState — so typing a character only
+  // rebuilds the picker + its dropdown, not the entire page (which previously
+  // meant rebuilding hundreds of nodes on every keystroke).
+  function rerenderInstance(inst) {
+    var host = inst._host;
+    if (!host || !host.isConnected) return;
+    var focusInfo = focusablePath(host);
+    var vals = inst.renderVals ? inst.renderVals() : {};
+    var compScope = Object.assign(Object.create(null), inst.props, vals);
+    var ctx = { counts: {}, store: inst._store, seen: new Set(), scheduler: inst._scheduler };
+    var rendered = [];
+    renderNodes(inst._def.fragment, compScope, null, ctx, rendered);
+    inst._store.forEach(function (_i, k) { if (!ctx.seen.has(k)) inst._store.delete(k); });
+    applyExtra(rendered, inst._extraStyle, inst._extraClass);
+    host.replaceChildren.apply(host, rendered);
+    restoreFocus(host, focusInfo);
+  }
+
+  function makeScopedScheduler(inst) {
+    return function () {
+      if (inst._pending) return;
+      inst._pending = true;
+      Promise.resolve().then(function () { inst._pending = false; rerenderInstance(inst); });
+    };
+  }
+
   function renderImport(node, scope, ctx, out) {
     var name = node.getAttribute("name");
     var def = registry[name];
@@ -233,38 +276,48 @@
       props[an] = w ? resolve(w, scope) : (av.indexOf("{{") >= 0 ? interpolate(av, scope) : av);
     }
 
-    // instance identity (stateful components persist across re-renders)
-    var inst;
     if (def.stateful) {
+      // persistent instance, keyed by document order within this render pass
       ctx.counts[name] = (ctx.counts[name] || 0);
       var key = name + "#" + (ctx.counts[name]++);
-      inst = ctx.store.get(key);
-      if (!inst) { inst = new def.Logic(props); inst._scheduler = ctx.scheduler; ctx.store.set(key, inst); }
-      else { inst.props = props; }
-      ctx.seen.add(key);
-    } else {
-      inst = new def.Logic(props);
-    }
-
-    var vals = inst.renderVals ? inst.renderVals() : {};
-    var compScope = Object.assign(Object.create(null), props, vals);
-
-    var rendered = [];
-    renderNodes(def.fragment, compScope, null, ctx, rendered);
-
-    // apply leftover style/class from the dc-import tag onto the root element
-    for (var r = 0; r < rendered.length; r++) {
-      var rn = rendered[r];
-      if (rn.nodeType === 1) {
-        if (extraStyle != null) {
-          var cur = rn.getAttribute("style") || "";
-          rn.setAttribute("style", cur ? (cur + ";" + extraStyle) : extraStyle);
-        }
-        if (extraClass != null) rn.setAttribute("class", ((rn.getAttribute("class") || "") + " " + extraClass).trim());
-        break;
+      var inst = ctx.store.get(key);
+      if (!inst) {
+        inst = new def.Logic(props);
+        inst._store = new Map();              // nested stateful sub-instances
+        inst._scheduler = makeScopedScheduler(inst);
+        ctx.store.set(key, inst);
+      } else {
+        inst.props = props;
       }
+      ctx.seen.add(key);
+      inst._def = def;
+      inst._extraStyle = extraStyle;
+      inst._extraClass = extraClass;
+      // a display:contents host keeps the component re-renderable in place
+      // without introducing a layout box of its own
+      var host = document.createElement("div");
+      host.setAttribute("style", "display:contents");
+      inst._host = host;
+      var vals = inst.renderVals ? inst.renderVals() : {};
+      var compScope = Object.assign(Object.create(null), inst.props, vals);
+      var hctx = { counts: {}, store: inst._store, seen: new Set(), scheduler: inst._scheduler };
+      var rendered = [];
+      renderNodes(def.fragment, compScope, null, hctx, rendered);
+      inst._store.forEach(function (_i, k) { if (!hctx.seen.has(k)) inst._store.delete(k); });
+      applyExtra(rendered, extraStyle, extraClass);
+      for (var i = 0; i < rendered.length; i++) host.appendChild(rendered[i]);
+      out.push(host);
+      return;
     }
-    for (var o = 0; o < rendered.length; o++) out.push(rendered[o]);
+
+    // stateless: a fresh instance each render, inlined into the parent output
+    var sInst = new def.Logic(props);
+    var sVals = sInst.renderVals ? sInst.renderVals() : {};
+    var sScope = Object.assign(Object.create(null), props, sVals);
+    var sRendered = [];
+    renderNodes(def.fragment, sScope, null, ctx, sRendered);
+    applyExtra(sRendered, extraStyle, extraClass);
+    for (var o = 0; o < sRendered.length; o++) out.push(sRendered[o]);
   }
 
   /* ---------- focus / caret preservation ---------- */
