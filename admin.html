@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lega World — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" />
+  <link rel="icon" href="assets/logo/lega-world-logo-primary.svg" />
+  <style>
+    :root{
+      --purple:#48246C; --purple-dark:#2C1545; --teal:#009C9C; --teal-d:#067C7C;
+      --gold:#F0B418; --sky:#90C0E4; --canvas:#E4F0F0; --ink:#281F38; --muted:#5C5470; --line:#E2ECEE;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Montserrat',system-ui,sans-serif;background:var(--canvas);color:var(--ink);}
+    a{color:var(--teal-d)}
+    .wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+    /* top bar */
+    header{background:var(--purple-dark);color:#fff;position:sticky;top:0;z-index:20;}
+    .bar{display:flex;align-items:center;gap:12px;min-height:62px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:9px;font-weight:800}
+    .brand img{height:26px}
+    .brand .a{font-weight:500}.brand .b{color:var(--gold)}
+    .spacer{flex:1}
+    .pill{display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:999px;}
+    .pill.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+    .pill.gold{background:var(--gold);color:var(--purple-dark)}
+    .pill.teal{background:var(--teal);color:#fff}
+    .pill.sm{font-size:12px;padding:7px 12px}
+    .pill:disabled{opacity:.5;cursor:default}
+    /* nav tabs */
+    nav.tabs{background:var(--purple);}
+    nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto}
+    nav.tabs button{background:transparent;border:none;color:rgba(255,255,255,.72);font-family:inherit;font-weight:700;font-size:13px;padding:13px 14px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
+    nav.tabs button.active{color:#fff;border-bottom-color:var(--gold)}
+    /* content */
+    main{padding:24px 0 80px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:18px}
+    .card h2{margin:0 0 4px;font-size:20px;letter-spacing:-.01em}
+    .card .sub{margin:0 0 16px;color:var(--muted);font-size:14px;font-weight:500}
+    label.fl{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 5px}
+    input.f, select.f, textarea.f{width:100%;font-family:inherit;font-size:14px;font-weight:500;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#FAFCFC;color:var(--ink)}
+    textarea.f{min-height:70px;resize:vertical}
+    input.f:focus,select.f:focus,textarea.f:focus{outline:2px solid var(--teal);border-color:var(--teal)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .grid{display:grid;gap:10px}
+    .item{border:1px solid var(--line);border-radius:12px;padding:12px;background:#FBFCFD;margin-bottom:10px}
+    .item .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    .item .hd .t{font-weight:700;font-size:13px;color:var(--purple)}
+    .x{background:#fff;border:1px solid var(--line);color:#C0392B;border-radius:8px;cursor:pointer;font-weight:800;font-size:13px;padding:5px 10px;font-family:inherit}
+    .muted{color:var(--muted);font-size:13px;font-weight:500}
+    .saved{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--teal-d);color:#fff;font-weight:700;font-size:14px;padding:11px 20px;border-radius:999px;box-shadow:0 8px 30px rgba(6,124,124,.4);opacity:0;transition:opacity .2s, transform .2s;pointer-events:none;z-index:50}
+    .saved.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+    /* login */
+    .login{max-width:420px;margin:60px auto;}
+    .err{color:#C0392B;font-size:13px;font-weight:600;margin-top:8px;min-height:18px}
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:560px){.cols{grid-template-columns:1fr}}
+    .banner{background:#FFF6E5;border:1px solid #F0D79A;color:#7A5A12;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:16px}
+  </style>
+</head>
+<body>
+  <div id="admin"></div>
+  <div id="toast" class="saved">Saved ✓</div>
+
+  <script src="config.js"></script>
+  <script src="js/data.seed.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

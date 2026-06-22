@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lega World — Build the beautiful game</title>
+  <meta name="description" content="Lega World — a grassroots football ecosystem. Competitions, league tables, teams, players, transfers and 15 seasons of stats." />
+  <meta name="theme-color" content="#2C1545" />
+
+  <!-- Montserrat (the brand typeface) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" />
+
+  <link rel="icon" href="assets/logo/lega-world-logo-primary.svg" />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- runtime + components + app (no build step, no framework) -->
+  <script src="js/dc-runtime.js"></script>
+  <script src="js/components.js"></script>
+
+  <!-- data: config + bundled defaults + Supabase data layer -->
+  <script src="config.js"></script>
+  <script src="js/data.seed.js"></script>
+  <script src="js/supabase.js"></script>
+
+  <!-- the application (original template + logic) -->
+  <script src="js/app.js"></script>
+
+  <!-- boot: load content from Supabase (or fall back to defaults), then mount -->
+  <script>
+    (function () {
+      function boot() {
+        window.LEGA_loadContent().then(function (content) {
+          // content === null -> the app uses its built-in defaults (identical to the seed)
+          window.LEGA_CONTENT = content;
+          window.LEGA_MOUNT();
+        });
+      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+      else boot();
+    })();
+  </script>
+</body>
+</html>

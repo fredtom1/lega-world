@@ -1,0 +1,9 @@
+# Netlify configuration for Lega World (static site, no build step).
+[build]
+  publish = "."
+
+# Pretty URL for the editor: /admin -> /admin.html
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200

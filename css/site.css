@@ -1,0 +1,39 @@
+/* =====================================================================
+   site.css — base styles from the original Lega World design (verbatim)
+   plus a light responsive layer. Most of the layout is already fluid
+   (CSS grid auto-fit + clamp() font sizes); this just polishes phones.
+   ===================================================================== */
+
+/* ---- original head <style> block (unchanged) ---- */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Montserrat', system-ui, sans-serif; background: #E4F0F0; color: #281F38; }
+::selection { background: #F0B418; color: #2C1545; }
+input, select, textarea { font-family: 'Montserrat', system-ui, sans-serif; }
+input:focus, select:focus, textarea:focus { outline: 3px solid #009C9C; outline-offset: 1px; border-color: #009C9C !important; }
+.lw-tick { display: flex; gap: 36px; white-space: nowrap; animation: lwtick 30s linear infinite; }
+@keyframes lwtick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .lw-tick { animation: none; } }
+.lw-fade { animation: lwfade .35s ease both; }
+@keyframes lwfade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---- responsive layer ---- */
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+
+/* smooth, thin scrollbars for the horizontal pills (nav, team rail, tabs) */
+.lw-tick,
+[style*="overflow-x:auto"] {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+[style*="overflow-x:auto"]::-webkit-scrollbar { height: 6px; }
+[style*="overflow-x:auto"]::-webkit-scrollbar-thumb { background: rgba(72,36,108,.25); border-radius: 6px; }
+
+/* On phones, trim the generous 22px horizontal gutters so content breathes. */
+@media (max-width: 560px) {
+  [style*="px 22px"] { padding-left: 16px !important; padding-right: 16px !important; }
+  [style*=" 22px;"] { padding-left: 16px !important; padding-right: 16px !important; }
+  /* large feature panels with uniform padding */
+  [style*="padding:44px"] { padding: 26px 20px !important; }
+  [style*="padding:48px 40px"] { padding: 30px 20px !important; }
+}

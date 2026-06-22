@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<path d="M62 178 C 96 150 126 110 166 70" fill="none" stroke="#48246C" stroke-width="15" stroke-linecap="round"></path>
+<path d="M62 178 C 96 150 126 110 166 70" fill="none" stroke="#90C0E4" stroke-width="15" stroke-linecap="round" stroke-dasharray="2 26" opacity="0.0"></path>
+<circle cx="62" cy="178" r="19" fill="#009C9C"></circle>
+<path d="M176.00,26.00 L183.99,49.00 L208.34,49.49 L188.93,64.20 L195.98,87.51 L176.00,73.60 L156.02,87.51 L163.07,64.20 L143.66,49.49 L168.01,49.00 Z" fill="#F0B418"></path>
+</svg>
