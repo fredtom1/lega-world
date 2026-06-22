@@ -679,6 +679,10 @@
   }
 
   DC.register("App", APP_TEMPLATE, Component);
+  // Exposed so an optional integration layer (js/integrations.js) can patch
+  // the template/logic (e.g. add a Players field, route submits to Supabase).
+  window.LEGA_APP_TEMPLATE = APP_TEMPLATE;
+  window.LEGA_AppComponent = Component;
 
   // Global image fallback: any brand logo / raw <img> that fails to load
   // (e.g. an asset not yet supplied) is swapped for an on-brand emblem.

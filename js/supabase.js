@@ -64,4 +64,45 @@
         .then(function (res) { if (res.error) throw new Error(res.error.message); return res; });
     });
   };
+
+  // Generic table helpers + image upload (Phase 1: submissions + news photos)
+  window.LEGA_db = {
+    list: function (table, orderCol, asc) {
+      return getClient().then(function (sb) {
+        if (!sb) return [];
+        var q = sb.from(table).select("*");
+        if (orderCol) q = q.order(orderCol, { ascending: !!asc });
+        return q.then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; });
+      });
+    },
+    insert: function (table, row) {
+      return getClient().then(function (sb) {
+        if (!sb) throw new Error("Supabase is not configured.");
+        return sb.from(table).insert(row).then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+      });
+    },
+    update: function (table, id, patch) {
+      return getClient().then(function (sb) {
+        if (!sb) throw new Error("Supabase is not configured.");
+        return sb.from(table).update(patch).eq("id", id).then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+      });
+    },
+    remove: function (table, id) {
+      return getClient().then(function (sb) {
+        if (!sb) throw new Error("Supabase is not configured.");
+        return sb.from(table).delete().eq("id", id).then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+      });
+    },
+    uploadImage: function (file) {
+      return getClient().then(function (sb) {
+        if (!sb) throw new Error("Supabase is not configured.");
+        var ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        var path = "news/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+        return sb.storage.from("media").upload(path, file, { cacheControl: "3600", upsert: false }).then(function (r) {
+          if (r.error) throw new Error(r.error.message);
+          return sb.storage.from("media").getPublicUrl(path).data.publicUrl;
+        });
+      });
+    }
+  };
 })();

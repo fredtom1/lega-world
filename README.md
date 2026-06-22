@@ -121,3 +121,29 @@ automatically — no code changes needed.
 - `css/site.css` — base styles (from the design) + a light responsive layer.
 
 No bundler, no `npm install` to run — just static files.
+
+---
+
+## 7. Operating the league (Match Centre · registrations · transfers · photos)
+
+These features need a one‑time extra setup: run **`supabase-phase1.sql`** in the Supabase
+SQL Editor (creates two tables — `registrations`, `transfer_requests` — and a public
+`media` storage bucket for photos).
+
+Once that's done, in `/admin`:
+
+- **Match Centre** — pick a competition + season, enter a result (home/away + score), and
+  the **league table recalculates automatically** (3 pts win / 1 draw / 0 loss, sorted by
+  points → goal difference → goals). Click **Save changes** to publish.
+- **News** — add a story, **upload a live‑action photo**, write the report/interview, Save.
+  On the site the card shows the photo and opens as a full article when clicked.
+- **Registrations** — team registrations submitted from the public *Register your team*
+  form (now including a **player list**) appear here. **Approve → add squad** publishes the
+  team and its players to the live site.
+- **Pending transfers** — transfer requests from the public *Transfers* page appear here.
+  **Approve & publish** adds the move to the transfer history and moves the player between
+  squads.
+
+Public submissions work with no login; only the signed‑in admin can see and approve them
+(enforced by row‑level security). Coach/team‑owner self‑service logins and the
+buying→selling‑club transfer handshake are planned for Phase 2.

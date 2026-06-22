@@ -125,6 +125,9 @@
   var SECTIONS = [
     ["rosters", "Teams & Squads"],
     ["archive", "Seasons & Results"],
+    ["matchcentre", "Match Centre"],
+    ["regq", "Registrations"],
+    ["txq", "Pending Transfers"],
     ["transfersHistory", "Transfers"],
     ["news", "News"],
     ["bestPlayerByYear", "Best Player"],
@@ -170,8 +173,9 @@
     var body = document.getElementById("sectionBody");
     body.innerHTML = "";
     var fn = ({
-      rosters: rostersEditor, archive: archiveEditor, transfersHistory: rowsSection,
-      news: rowsSection, bestPlayerByYear: rowsSection, ticker: tickerEditor,
+      rosters: rostersEditor, archive: archiveEditor, matchcentre: matchCentreEditor,
+      regq: registrationsEditor, txq: transfersQueueEditor, transfersHistory: rowsSection,
+      news: newsEditor, bestPlayerByYear: rowsSection, ticker: tickerEditor,
       competitions: rowsSection, clubs2026: rowsSection, learnTracks: rowsSection,
       grayCupYellow: mapNumEditor, __advanced: advancedEditor
     })[current];
@@ -508,4 +512,251 @@
     ]));
     return card;
   }
+
+  /* ============================ PHASE 1 ============================ */
+
+  function teamOptions() {
+    var set = {};
+    Object.keys(model.rosters || {}).forEach(function (t) { set[t] = 1; });
+    (model.clubs2026 || []).forEach(function (c) { if (c && c.badge) set[c.badge] = 1; });
+    return Object.keys(set).sort();
+  }
+  function teamSelect(value, onchange) {
+    var opts = [el("option", { value: "" }, ["— team —"])].concat(teamOptions().map(function (t) { return el("option", { value: t }, [t]); }));
+    var sel = el("select", { class: "f" }, opts);
+    sel.value = value || "";
+    sel.addEventListener("change", function () { onchange(sel.value); });
+    return sel;
+  }
+  function computeTable(matches) {
+    var T = {};
+    function g(t) { if (!T[t]) T[t] = { team: t, pts: 0, w: 0, t: 0, l: 0, gf: 0, ga: 0 }; return T[t]; }
+    (matches || []).forEach(function (m) {
+      var h = m[0], a = m[2], hs = m[1], as = m[3];
+      if (!h || !a || hs === "" || as === "" || hs == null || as == null) return;
+      hs = +hs; as = +as; if (isNaN(hs) || isNaN(as)) return;
+      var H = g(h), A = g(a);
+      H.gf += hs; H.ga += as; A.gf += as; A.ga += hs;
+      if (hs > as) { H.w++; H.pts += 3; A.l++; }
+      else if (hs < as) { A.w++; A.pts += 3; H.l++; }
+      else { H.t++; A.t++; H.pts++; A.pts++; }
+    });
+    return Object.keys(T).map(function (k) { return T[k]; })
+      .sort(function (x, y) { return y.pts - x.pts || (y.gf - y.ga) - (x.gf - x.ga) || y.gf - x.gf || x.team.localeCompare(y.team); })
+      .map(function (r) { return [r.team, r.pts, r.w, r.t, r.l, r.gf, r.ga]; });
+  }
+  function badge(status) {
+    var c = status === "approved" ? "#1FA05A" : status === "rejected" ? "#C0392B" : "#E8A91C";
+    return el("span", { style: "font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:" + c + ";padding:3px 9px;border-radius:999px" }, [status || "pending"]);
+  }
+
+  /* ---------- Match Centre (scores -> auto table) ---------- */
+  function matchCentreEditor() {
+    var arch = model.archive || (model.archive = []);
+    if (ui.mci == null || ui.mci >= arch.length) ui.mci = 0;
+    var comp = arch[ui.mci];
+    var card = el("div", { class: "card" }, [
+      el("h2", null, ["Match Centre"]),
+      el("p", { class: "sub" }, ["Record a result and the league table recalculates automatically (3 pts win, 1 draw, 0 loss)."])
+    ]);
+    var compSel = el("select", { class: "f", style: "max-width:260px" }, arch.map(function (c, i) { return el("option", { value: i }, [c.name]); }));
+    compSel.value = String(ui.mci);
+    compSel.addEventListener("change", function () { ui.mci = +compSel.value; ui.msi = 0; paint(); });
+    card.appendChild(el("div", { class: "row", style: "margin-bottom:12px" }, [field("Competition", compSel)]));
+    if (!comp) { card.appendChild(saveBtnRow("archive")); return card; }
+    var seasons = comp.seasons || (comp.seasons = []);
+    if (ui.msi == null || ui.msi >= seasons.length) ui.msi = 0;
+    var seasonSel = el("select", { class: "f", style: "max-width:260px" }, seasons.map(function (s, i) { return el("option", { value: i }, [s.name || s.short || ("Season " + (i + 1))]); }));
+    seasonSel.value = String(ui.msi);
+    seasonSel.addEventListener("change", function () { ui.msi = +seasonSel.value; paint(); });
+    card.appendChild(el("div", { class: "row", style: "margin-bottom:14px" }, [field("Season", seasonSel)]));
+    var s = seasons[ui.msi];
+    if (!s) { card.appendChild(saveBtnRow("archive")); return card; }
+    if (!Array.isArray(s.matches)) s.matches = [];
+
+    var nh = "", na = "";
+    var hSel = teamSelect("", function (v) { nh = v; });
+    var aSel = teamSelect("", function (v) { na = v; });
+    var hsIn = el("input", { class: "f", type: "number", placeholder: "0", style: "width:64px" });
+    var asIn = el("input", { class: "f", type: "number", placeholder: "0", style: "width:64px" });
+    card.appendChild(el("div", { class: "item" }, [
+      el("div", { class: "hd" }, [el("span", { class: "t" }, ["Add a result"])]),
+      el("div", { class: "row", style: "align-items:flex-end" }, [
+        el("div", { style: "flex:1;min-width:130px" }, [el("label", { class: "fl" }, ["Home"]), hSel]),
+        el("div", null, [el("label", { class: "fl" }, ["GF"]), hsIn]),
+        el("div", null, [el("label", { class: "fl" }, ["GA"]), asIn]),
+        el("div", { style: "flex:1;min-width:130px" }, [el("label", { class: "fl" }, ["Away"]), aSel]),
+        btn("Add result", function () {
+          if (!nh || !na || hsIn.value === "" || asIn.value === "") { toast("Pick both teams and enter the score.", true); return; }
+          s.matches.push([nh, num(hsIn.value), na, num(asIn.value)]);
+          s.table = computeTable(s.matches); paint();
+        }, "gold")
+      ])
+    ]));
+
+    var rlist = el("div", { class: "item" }, [el("div", { class: "hd" }, [
+      el("span", { class: "t" }, ["Results (" + s.matches.length + ")"]),
+      btn("Recalculate table", function () { s.table = computeTable(s.matches); paint(); }, "teal")
+    ])]);
+    s.matches.forEach(function (m, i) {
+      rlist.appendChild(el("div", { class: "row", style: "margin-bottom:6px" }, [
+        el("span", { style: "flex:1;font-weight:600;font-size:14px" }, [(m[0] || "?") + "  " + (m[1] == null ? "-" : m[1]) + " : " + (m[3] == null ? "-" : m[3]) + "  " + (m[2] || "?")]),
+        el("button", { class: "x", onclick: function () { s.matches.splice(i, 1); s.table = computeTable(s.matches); paint(); } }, ["✕"])
+      ]));
+    });
+    card.appendChild(rlist);
+
+    var tbl = computeTable(s.matches);
+    var prev = el("div", { class: "item" }, [el("div", { class: "hd" }, [el("span", { class: "t" }, ["Standings (auto)"])])]);
+    prev.appendChild(el("div", { class: "row", style: "font-size:11px;font-weight:700;color:#A09AAE;text-transform:uppercase" }, [
+      el("span", { style: "width:22px" }, ["#"]), el("span", { style: "flex:1" }, ["Club"]),
+      el("span", { style: "width:30px;text-align:center" }, ["W"]), el("span", { style: "width:30px;text-align:center" }, ["D"]),
+      el("span", { style: "width:30px;text-align:center" }, ["L"]), el("span", { style: "width:36px;text-align:center" }, ["GF"]),
+      el("span", { style: "width:36px;text-align:center" }, ["GA"]), el("span", { style: "width:36px;text-align:center" }, ["Pts"])
+    ]));
+    tbl.forEach(function (r, i) {
+      prev.appendChild(el("div", { class: "row", style: "padding:5px 0;border-top:1px solid #EEF4F4" }, [
+        el("span", { style: "width:22px;font-weight:700;color:#067C7C" }, [String(i + 1)]),
+        el("span", { style: "flex:1;font-weight:600;font-size:13px" }, [r[0]]),
+        el("span", { style: "width:30px;text-align:center" }, [String(r[2])]), el("span", { style: "width:30px;text-align:center" }, [String(r[3])]),
+        el("span", { style: "width:30px;text-align:center" }, [String(r[4])]), el("span", { style: "width:36px;text-align:center" }, [String(r[5])]),
+        el("span", { style: "width:36px;text-align:center" }, [String(r[6])]), el("span", { style: "width:36px;text-align:center;font-weight:800;color:#48246C" }, [String(r[1])])
+      ]));
+    });
+    if (!tbl.length) prev.appendChild(el("div", { class: "muted", style: "padding-top:8px" }, ["No results recorded yet."]));
+    card.appendChild(prev);
+    card.appendChild(saveBtnRow("archive"));
+    return card;
+  }
+
+  /* ---------- News CMS (photo upload + article body) ---------- */
+  function newsEditor() {
+    var arr = model.news || (model.news = []);
+    var card = el("div", { class: "card" }, [
+      el("h2", null, ["News & Features"]),
+      el("p", { class: "sub" }, ["Post match reports and interviews. Upload a live-action photo; it shows on the News page and opens as a full article when clicked."])
+    ]);
+    var list = el("div");
+    function redraw() {
+      list.innerHTML = "";
+      arr.forEach(function (r, i) {
+        var preview = el("div", { style: "width:90px;height:90px;border-radius:10px;flex:none;background:" + (r.bg || "#48246C") + ";display:flex;align-items:center;justify-content:center;overflow:hidden" });
+        if (r.img) preview.appendChild(el("img", { src: r.img, style: "width:100%;height:100%;object-fit:cover" }));
+        var fileIn = el("input", { type: "file", accept: "image/*", style: "font-size:12px;max-width:100%" });
+        var upStatus = el("span", { class: "muted", style: "margin-left:8px" });
+        fileIn.addEventListener("change", function () {
+          var file = fileIn.files && fileIn.files[0]; if (!file) return;
+          upStatus.textContent = "Uploading…";
+          window.LEGA_db.uploadImage(file).then(function (url) { r.img = url; upStatus.textContent = "Uploaded ✓"; redraw(); })
+            .catch(function (e) { upStatus.textContent = "Upload failed: " + e.message; });
+        });
+        list.appendChild(el("div", { class: "item" }, [
+          el("div", { class: "hd" }, [el("span", { class: "t" }, [r.title || "New story"]), el("button", { class: "x", onclick: function () { arr.splice(i, 1); redraw(); } }, ["Remove"])]),
+          el("div", { class: "row", style: "align-items:flex-start;gap:14px" }, [
+            preview,
+            el("div", { style: "flex:1;min-width:220px" }, [
+              field("Photo", el("div", { class: "row" }, [fileIn, upStatus])),
+              el("div", { class: "cols", style: "margin-top:8px" }, [
+                field("Category", input(r.cat, function (v) { r.cat = v; })),
+                field("Headline", input(r.title, function (v) { r.title = v; }))
+              ]),
+              el("div", { style: "margin-top:8px" }, [field("Article / report (shown when the card is opened)", input(r.body, function (v) { r.body = v; }, { tag: "textarea" }))])
+            ])
+          ])
+        ]));
+      });
+    }
+    redraw();
+    card.appendChild(list);
+    card.appendChild(el("div", { class: "row" }, [btn("+ Add story", function () { arr.push({ cat: "Match Report", title: "", bg: "#48246C", img: "", body: "" }); redraw(); }, "gold")]));
+    card.appendChild(saveBtnRow("news"));
+    return card;
+  }
+
+  /* ---------- Registrations queue ---------- */
+  function registrationsEditor() {
+    var card = el("div", { class: "card" }, [
+      el("h2", null, ["Team registrations"]),
+      el("p", { class: "sub" }, ["Submitted from the public “Register your team” form. Approve to add the team + squad to the live site."])
+    ]);
+    var wrap = el("div"); card.appendChild(wrap); loadRegs(wrap); return card;
+  }
+  function loadRegs(wrap) {
+    wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Loading…"]));
+    window.LEGA_db.list("registrations", "created_at", false).then(function (rows) { renderRegs(wrap, rows); })
+      .catch(function (e) { wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Couldn't load: " + e.message])); });
+  }
+  function renderRegs(wrap, rows) {
+    wrap.innerHTML = "";
+    if (!rows.length) { wrap.appendChild(el("div", { class: "muted" }, ["No registrations yet."])); return; }
+    rows.forEach(function (r) {
+      var players = Array.isArray(r.players) ? r.players : [];
+      wrap.appendChild(el("div", { class: "item" }, [
+        el("div", { class: "hd" }, [el("span", { class: "t" }, [r.team || "—"]), badge(r.status)]),
+        el("div", { class: "muted", style: "margin-bottom:8px" }, [[r.manager, r.state, r.comp, r.email, (r.squad ? r.squad + " squad" : "")].filter(Boolean).join("  ·  ")]),
+        el("div", { style: "font-size:11px;font-weight:700;text-transform:uppercase;color:#A09AAE;margin-bottom:6px" }, [players.length + " players"]),
+        el("div", { class: "row", style: "gap:6px" }, players.map(function (p) { return el("span", { style: "font-size:12px;font-weight:600;background:#EAF3F3;border-radius:999px;padding:4px 10px" }, [p]); })),
+        el("div", { class: "row", style: "margin-top:12px" }, [
+          btn("Approve → add squad", function () { approveReg(r, wrap); }, "teal"),
+          el("button", { class: "x", onclick: function () { rejectReg(r, wrap); } }, ["Reject"]),
+          el("button", { class: "x", onclick: function () { delReg(r, wrap); } }, ["Delete"])
+        ])
+      ]));
+    });
+  }
+  function approveReg(r, wrap) {
+    var ros = model.rosters || (model.rosters = {});
+    var team = r.team || "New team";
+    var players = (Array.isArray(r.players) ? r.players : []).filter(Boolean);
+    ros[team] = Array.from(new Set((ros[team] || []).concat(players)));
+    window.LEGA_saveContent("rosters", ros)
+      .then(function () { return window.LEGA_db.update("registrations", r.id, { status: "approved" }); })
+      .then(function () { toast("Approved — " + team + " added to squads"); loadRegs(wrap); })
+      .catch(function (e) { toast("Error: " + e.message, true); });
+  }
+  function rejectReg(r, wrap) { window.LEGA_db.update("registrations", r.id, { status: "rejected" }).then(function () { toast("Rejected"); loadRegs(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
+  function delReg(r, wrap) { if (!confirm("Delete this registration permanently?")) return; window.LEGA_db.remove("registrations", r.id).then(function () { loadRegs(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
+
+  /* ---------- Pending transfers queue ---------- */
+  function transfersQueueEditor() {
+    var card = el("div", { class: "card" }, [
+      el("h2", null, ["Pending transfers"]),
+      el("p", { class: "sub" }, ["Submitted from the public Transfers page. Approve to publish to the transfer history and move the player between squads."])
+    ]);
+    var wrap = el("div"); card.appendChild(wrap); loadTx(wrap); return card;
+  }
+  function loadTx(wrap) {
+    wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Loading…"]));
+    window.LEGA_db.list("transfer_requests", "created_at", false).then(function (rows) { renderTx(wrap, rows); })
+      .catch(function (e) { wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Couldn't load: " + e.message])); });
+  }
+  function renderTx(wrap, rows) {
+    wrap.innerHTML = "";
+    if (!rows.length) { wrap.appendChild(el("div", { class: "muted" }, ["No transfer requests yet."])); return; }
+    rows.forEach(function (r) {
+      wrap.appendChild(el("div", { class: "item" }, [
+        el("div", { class: "hd" }, [el("span", { class: "t" }, [r.player || "—"]), badge(r.status)]),
+        el("div", { class: "muted", style: "margin-bottom:10px" }, [(r.from_team || "?") + "  →  " + (r.to_team || "?") + "   ·   " + (r.type || "Permanent") + (r.window_date ? "  ·  " + r.window_date : "")]),
+        el("div", { class: "row" }, [
+          btn("Approve & publish", function () { approveTx(r, wrap); }, "teal"),
+          el("button", { class: "x", onclick: function () { rejectTx(r, wrap); } }, ["Reject"]),
+          el("button", { class: "x", onclick: function () { delTx(r, wrap); } }, ["Delete"])
+        ])
+      ]));
+    });
+  }
+  function approveTx(r, wrap) {
+    var th = model.transfersHistory || (model.transfersHistory = []);
+    th.unshift({ player: r.player, from: r.from_team, to: r.to_team, date: r.window_date || "", type: r.type || "Permanent", conf: "Confirmed" });
+    var ros = model.rosters || (model.rosters = {});
+    if (r.from_team && ros[r.from_team]) ros[r.from_team] = ros[r.from_team].filter(function (p) { return p !== r.player; });
+    if (r.to_team) { ros[r.to_team] = ros[r.to_team] || []; if (ros[r.to_team].indexOf(r.player) < 0) ros[r.to_team].push(r.player); }
+    window.LEGA_saveContent("transfersHistory", th)
+      .then(function () { return window.LEGA_saveContent("rosters", ros); })
+      .then(function () { return window.LEGA_db.update("transfer_requests", r.id, { status: "approved" }); })
+      .then(function () { toast("Transfer approved & published"); loadTx(wrap); })
+      .catch(function (e) { toast("Error: " + e.message, true); });
+  }
+  function rejectTx(r, wrap) { window.LEGA_db.update("transfer_requests", r.id, { status: "rejected" }).then(function () { toast("Rejected"); loadTx(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
+  function delTx(r, wrap) { if (!confirm("Delete this transfer request permanently?")) return; window.LEGA_db.remove("transfer_requests", r.id).then(function () { loadTx(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
 })();
