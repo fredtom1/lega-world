@@ -30,6 +30,11 @@
   var anchor = '<span onClick="{{ submitReg }}"';
   if (template.indexOf(anchor) >= 0) template = template.replace(anchor, PLAYERS_FIELD + anchor);
 
+  // discreet "Coach / owner login" link in the footer (not in the public nav)
+  var FOOT = '<div style="color:#90C0E4;font-size:13px;font-weight:500;">Ekiti &middot; Lagos &middot; Anambra, Nigeria &middot; Founded 2013</div>';
+  var COACH_LINK = '<a href="coach.html" style="color:#fff;font-size:12px;font-weight:700;text-decoration:none;background:#009C9C;padding:7px 14px;border-radius:999px;">Coach / owner login</a>';
+  if (template.indexOf(FOOT) >= 0) template = template.replace(FOOT, '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;">' + COACH_LINK + FOOT + '</div>');
+
   // provide the bindings for the new field
   var origSignRegVals = proto.signRegVals;
   proto.signRegVals = function () {

@@ -128,6 +128,7 @@
     ["matchcentre", "Match Centre"],
     ["regq", "Registrations"],
     ["txq", "Pending Transfers"],
+    ["coaches", "Coaches"],
     ["transfersHistory", "Transfers"],
     ["news", "News"],
     ["bestPlayerByYear", "Best Player"],
@@ -167,6 +168,8 @@
     Object.keys(window.LEGA_SEED || {}).forEach(function (k) {
       if (model[k] == null) model[k] = clone(window.LEGA_SEED[k]);
     });
+    // Phase 2: squads are canonical in team_players — use them when present
+    try { var squads = await window.LEGA_loadSquads(); if (squads) model.rosters = squads; } catch (e) {}
   }
 
   function paint() {
@@ -174,7 +177,7 @@
     body.innerHTML = "";
     var fn = ({
       rosters: rostersEditor, archive: archiveEditor, matchcentre: matchCentreEditor,
-      regq: registrationsEditor, txq: transfersQueueEditor, transfersHistory: rowsSection,
+      regq: registrationsEditor, txq: transfersQueueEditor, coaches: coachesEditor, transfersHistory: rowsSection,
       news: newsEditor, bestPlayerByYear: rowsSection, ticker: tickerEditor,
       competitions: rowsSection, clubs2026: rowsSection, learnTracks: rowsSection,
       grayCupYellow: mapNumEditor, __advanced: advancedEditor
@@ -320,7 +323,7 @@
       addTeam,
       el("button", { class: "x", onclick: function () {
         if (!ui.team) return;
-        if (confirm("Delete team “" + ui.team + "” and its squad?")) { delete ros[ui.team]; ui.team = null; paint(); }
+        if (confirm("Delete team “" + ui.team + "” and its squad?")) { var t = ui.team; window.LEGA_squads.replaceTeam(t, []).catch(function () {}); delete ros[t]; ui.team = null; paint(); }
       } }, ["Delete team"])
     ]));
 
@@ -344,7 +347,20 @@
       card.appendChild(el("div", { style: "height:8px" }));
       card.appendChild(grid);
     }
-    card.appendChild(saveBtnRow("rosters"));
+    card.appendChild(el("div", { class: "row", style: "margin-top:14px" }, [
+      el("button", { class: "pill teal", onclick: function () {
+        if (!ui.team) { toast("Pick a team first.", true); return; }
+        window.LEGA_squads.replaceTeam(ui.team, model.rosters[ui.team] || []).then(function () { toast("Saved " + ui.team + " ✓"); }).catch(function (e) { toast(e.message, true); });
+      } }, ["Save this team"]),
+      el("button", { class: "pill gold", onclick: function () {
+        var teams = Object.keys(model.rosters || {});
+        if (!teams.length) return;
+        if (!confirm("Publish ALL " + teams.length + " squads to the live coach system? Overwrites live squads with this list.")) return;
+        Promise.all(teams.map(function (t) { return window.LEGA_squads.replaceTeam(t, model.rosters[t] || []); }))
+          .then(function () { toast("Published all squads ✓"); }).catch(function (e) { toast(e.message, true); });
+      } }, ["Publish all to live"]),
+      el("span", { class: "muted" }, ["Squads live in team_players; coaches edit their own at /coach."])
+    ]));
     return card;
   }
 
@@ -705,13 +721,13 @@
     });
   }
   function approveReg(r, wrap) {
-    var ros = model.rosters || (model.rosters = {});
     var team = r.team || "New team";
-    var players = (Array.isArray(r.players) ? r.players : []).filter(Boolean);
-    ros[team] = Array.from(new Set((ros[team] || []).concat(players)));
-    window.LEGA_saveContent("rosters", ros)
-      .then(function () { return window.LEGA_db.update("registrations", r.id, { status: "approved" }); })
-      .then(function () { toast("Approved — " + team + " added to squads"); loadRegs(wrap); })
+    var add = (Array.isArray(r.players) ? r.players : []).filter(Boolean);
+    window.LEGA_squads.list(team).then(function (existing) {
+      var merged = Array.from(new Set(existing.map(function (x) { return x.name; }).concat(add)));
+      return window.LEGA_squads.replaceTeam(team, merged);
+    }).then(function () { return window.LEGA_db.update("registrations", r.id, { status: "approved" }); })
+      .then(function () { toast("Approved — " + team + " squad added live"); loadRegs(wrap); })
       .catch(function (e) { toast("Error: " + e.message, true); });
   }
   function rejectReg(r, wrap) { window.LEGA_db.update("registrations", r.id, { status: "rejected" }).then(function () { toast("Rejected"); loadRegs(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
@@ -734,29 +750,64 @@
     wrap.innerHTML = "";
     if (!rows.length) { wrap.appendChild(el("div", { class: "muted" }, ["No transfer requests yet."])); return; }
     rows.forEach(function (r) {
+      var actionable = (r.status === "pending" || r.status === "requested");
+      var actions = [];
+      if (actionable) {
+        actions.push(btn("Approve & publish", function () { approveTx(r, wrap); }, "teal"));
+        actions.push(el("button", { class: "x", onclick: function () { rejectTx(r, wrap); } }, ["Reject"]));
+      }
+      actions.push(el("button", { class: "x", onclick: function () { delTx(r, wrap); } }, ["Delete"]));
       wrap.appendChild(el("div", { class: "item" }, [
         el("div", { class: "hd" }, [el("span", { class: "t" }, [r.player || "—"]), badge(r.status)]),
         el("div", { class: "muted", style: "margin-bottom:10px" }, [(r.from_team || "?") + "  →  " + (r.to_team || "?") + "   ·   " + (r.type || "Permanent") + (r.window_date ? "  ·  " + r.window_date : "")]),
-        el("div", { class: "row" }, [
-          btn("Approve & publish", function () { approveTx(r, wrap); }, "teal"),
-          el("button", { class: "x", onclick: function () { rejectTx(r, wrap); } }, ["Reject"]),
-          el("button", { class: "x", onclick: function () { delTx(r, wrap); } }, ["Delete"])
-        ])
+        el("div", { class: "row" }, actions)
       ]));
     });
   }
   function approveTx(r, wrap) {
-    var th = model.transfersHistory || (model.transfersHistory = []);
-    th.unshift({ player: r.player, from: r.from_team, to: r.to_team, date: r.window_date || "", type: r.type || "Permanent", conf: "Confirmed" });
-    var ros = model.rosters || (model.rosters = {});
-    if (r.from_team && ros[r.from_team]) ros[r.from_team] = ros[r.from_team].filter(function (p) { return p !== r.player; });
-    if (r.to_team) { ros[r.to_team] = ros[r.to_team] || []; if (ros[r.to_team].indexOf(r.player) < 0) ros[r.to_team].push(r.player); }
-    window.LEGA_saveContent("transfersHistory", th)
-      .then(function () { return window.LEGA_saveContent("rosters", ros); })
-      .then(function () { return window.LEGA_db.update("transfer_requests", r.id, { status: "approved" }); })
+    // league-office override -> SECURITY DEFINER RPC moves the player + logs it
+    window.LEGA_transfers.accept(r.id)
       .then(function () { toast("Transfer approved & published"); loadTx(wrap); })
       .catch(function (e) { toast("Error: " + e.message, true); });
   }
-  function rejectTx(r, wrap) { window.LEGA_db.update("transfer_requests", r.id, { status: "rejected" }).then(function () { toast("Rejected"); loadTx(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
+  function rejectTx(r, wrap) { window.LEGA_transfers.reject(r.id).then(function () { toast("Rejected"); loadTx(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
   function delTx(r, wrap) { if (!confirm("Delete this transfer request permanently?")) return; window.LEGA_db.remove("transfer_requests", r.id).then(function () { loadTx(wrap); }).catch(function (e) { toast("Error: " + e.message, true); }); }
+
+  /* ---------- Coaches: assign team + approve ---------- */
+  function coachesEditor() {
+    var card = el("div", { class: "card" }, [
+      el("h2", null, ["Coaches / team owners"]),
+      el("p", { class: "sub" }, ["People who signed up at /coach. Assign a team and Approve to let them manage that squad and run transfers."])
+    ]);
+    var link = location.origin + "/coach";
+    card.appendChild(el("div", { class: "row", style: "margin-bottom:14px" }, [
+      el("span", { class: "muted" }, ["Coach sign-up link:"]),
+      el("input", { class: "f", readonly: "readonly", value: link, style: "max-width:320px", onclick: function (e) { e.target.select(); } })
+    ]));
+    var wrap = el("div"); card.appendChild(wrap); loadCoaches(wrap); return card;
+  }
+  function loadCoaches(wrap) {
+    wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Loading…"]));
+    window.LEGA_coach.listAll().then(function (rows) { renderCoaches(wrap, rows); })
+      .catch(function (e) { wrap.innerHTML = ""; wrap.appendChild(el("div", { class: "muted" }, ["Couldn't load: " + e.message])); });
+  }
+  function renderCoaches(wrap, rows) {
+    wrap.innerHTML = "";
+    if (!rows.length) { wrap.appendChild(el("div", { class: "muted" }, ["No coach sign-ups yet — share the link above."])); return; }
+    rows.forEach(function (r) {
+      var teamSel = el("select", { class: "f", style: "max-width:240px" }, [el("option", { value: "" }, ["— team —"])].concat(teamOptions().map(function (t) { return el("option", { value: t }, [t]); })));
+      teamSel.value = r.team || "";
+      wrap.appendChild(el("div", { class: "item" }, [
+        el("div", { class: "hd" }, [el("span", { class: "t" }, [r.email || r.user_id]), badge(r.status)]),
+        el("div", { class: "row", style: "margin-top:10px;align-items:flex-end" }, [
+          field("Team", teamSel),
+          btn("Approve / activate", function () {
+            if (!teamSel.value) { toast("Assign a team first.", true); return; }
+            window.LEGA_coach.setStatus(r.user_id, teamSel.value, "active").then(function () { toast("Coach activated for " + teamSel.value); loadCoaches(wrap); }).catch(function (e) { toast(e.message, true); });
+          }, "teal"),
+          el("button", { class: "x", onclick: function () { window.LEGA_coach.setStatus(r.user_id, teamSel.value || r.team, "rejected").then(function () { toast("Rejected"); loadCoaches(wrap); }).catch(function (e) { toast(e.message, true); }); } }, ["Reject"])
+        ])
+      ]));
+    });
+  }
 })();

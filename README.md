@@ -145,5 +145,34 @@ Once that's done, in `/admin`:
   squads.
 
 Public submissions work with no login; only the signed‑in admin can see and approve them
-(enforced by row‑level security). Coach/team‑owner self‑service logins and the
-buying→selling‑club transfer handshake are planned for Phase 2.
+(enforced by row‑level security).
+
+---
+
+## 8. Coaches & team owners (Phase 2)
+
+Coaches/owners get their own logins to **manage their squad** and **run transfers**, where a
+buying coach requests a player and the **selling club's coach must accept** before the move
+happens (the league office can override). A coach can only ever touch their own team —
+enforced by the database.
+
+**One‑time setup**
+1. Edit `supabase-phase2.sql`: replace `YOUR_ADMIN_EMAIL@example.com` with the email you log
+   into `/admin` with. Run it in the Supabase **SQL Editor**.
+2. Supabase → **Authentication → Providers → Email**: make sure **Enable sign ups** is ON
+   (default). Turning **off** "Confirm email" lets coaches sign in immediately.
+3. Open `/admin` → **Coaches** tab → **Publish all to live** (under *Teams & Squads* →
+   "Publish all to live") to copy your current squads into the live `team_players` table.
+
+**How it runs**
+- Coaches go to **`/coach`**, create an account, and **request a team**.
+- You approve them under `/admin` → **Coaches** (assign team → Approve).
+- A coach's **My Team** tab edits their own squad live; **Transfers** lets them bid for
+  another club's player. The selling club's coach sees the offer under *Incoming offers* and
+  **Accepts** (player moves + logged) or **Rejects**. You can override any request from
+  `/admin` → **Pending Transfers**.
+- The public site reads squads live from `team_players`; the discreet **Coach / owner login**
+  link is in the site footer (not the public nav).
+
+Security note: the transfer "apply" runs inside a Postgres `SECURITY DEFINER` function so the
+cross‑club move is performed safely — neither coach can write the other club's squad directly.

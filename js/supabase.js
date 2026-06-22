@@ -105,4 +105,92 @@
       });
     }
   };
+
+  /* ============== Phase 2: auth roles, squads, transfer RPCs ============== */
+  function rpc(name, args) {
+    return getClient().then(function (sb) {
+      if (!sb) throw new Error("Supabase is not configured.");
+      return sb.rpc(name, args || {}).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; });
+    });
+  }
+  function groupSquads(rows) {
+    var o = {};
+    (rows || []).forEach(function (r) { (o[r.team] = o[r.team] || []).push(r.name); });
+    Object.keys(o).forEach(function (k) { o[k].sort(); });
+    return o;
+  }
+
+  // squads come from team_players (the per-team, row-secured table)
+  window.LEGA_loadSquads = function () {
+    return getClient().then(function (sb) {
+      if (!sb) return null;
+      return sb.from("team_players").select("team,name").then(function (r) {
+        if (r.error || !r.data || !r.data.length) return null;
+        return groupSquads(r.data);
+      });
+    }).catch(function () { return null; });
+  };
+
+  window.LEGA_auth = {
+    signUp: function (email, pw) { return getClient().then(function (sb) { return sb.auth.signUp({ email: email, password: pw }); }); },
+    signIn: function (email, pw) { return getClient().then(function (sb) { return sb.auth.signInWithPassword({ email: email, password: pw }); }); },
+    signOut: function () { return getClient().then(function (sb) { return sb.auth.signOut(); }); },
+    session: function () { return getClient().then(function (sb) { return sb ? sb.auth.getSession().then(function (s) { return s.data.session; }) : null; }); },
+    user: function () { return getClient().then(function (sb) { return sb ? sb.auth.getUser().then(function (u) { return u.data.user; }) : null; }); }
+  };
+  window.LEGA_isAdmin = function () { return rpc("is_admin").catch(function () { return false; }); };
+
+  window.LEGA_coach = {
+    myRow: function () {
+      return getClient().then(function (sb) {
+        if (!sb) return null;
+        return sb.auth.getUser().then(function (u) {
+          var uid = u.data.user && u.data.user.id; if (!uid) return null;
+          return sb.from("coaches").select("*").eq("user_id", uid).maybeSingle().then(function (r) { return r.data || null; });
+        });
+      });
+    },
+    requestTeam: function (team, email) {
+      return getClient().then(function (sb) {
+        return sb.auth.getUser().then(function (u) {
+          var uid = u.data.user && u.data.user.id; if (!uid) throw new Error("Not signed in.");
+          return sb.from("coaches").upsert({ user_id: uid, team: team, email: email, status: "pending" }, { onConflict: "user_id" })
+            .then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+        });
+      });
+    },
+    // admin: list all coaches / set a coach's team + status
+    listAll: function () { return getClient().then(function (sb) { return sb.from("coaches").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
+    setStatus: function (userId, team, status) {
+      return getClient().then(function (sb) {
+        return sb.from("coaches").update({ team: team, status: status }).eq("user_id", userId)
+          .then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+      });
+    }
+  };
+
+  window.LEGA_squads = {
+    listAll: function () { return getClient().then(function (sb) { return sb.from("team_players").select("id,team,name").order("name").then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
+    list: function (team) { return getClient().then(function (sb) { return sb.from("team_players").select("id,team,name").eq("team", team).order("name").then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
+    add: function (team, name) { return getClient().then(function (sb) { return sb.from("team_players").insert({ team: team, name: name }).then(function (r) { if (r.error) throw new Error(r.error.message); return r; }); }); },
+    remove: function (id) { return getClient().then(function (sb) { return sb.from("team_players").delete().eq("id", id).then(function (r) { if (r.error) throw new Error(r.error.message); return r; }); }); },
+    replaceTeam: function (team, names) {
+      return getClient().then(function (sb) {
+        return sb.from("team_players").delete().eq("team", team).then(function (d) {
+          if (d.error) throw new Error(d.error.message);
+          var rows = (names || []).filter(Boolean).map(function (n) { return { team: team, name: n }; });
+          if (!rows.length) return { data: [] };
+          return sb.from("team_players").insert(rows).then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+        });
+      });
+    }
+  };
+
+  window.LEGA_transfers = {
+    request: function (player, from, to, type) { return rpc("request_transfer", { p_player: player, p_from: from, p_to: to, p_type: type || "Permanent" }); },
+    accept: function (id) { return rpc("accept_transfer", { p_request: id }); },
+    reject: function (id) { return rpc("reject_transfer", { p_request: id }); },
+    all: function () { return getClient().then(function (sb) { return sb.from("transfer_requests").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
+    log: function () { return getClient().then(function (sb) { return sb.from("transfers_log").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); }
+  };
 })();

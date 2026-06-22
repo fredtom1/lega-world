@@ -36,8 +36,11 @@
   <script>
     (function () {
       function boot() {
-        window.LEGA_loadContent().then(function (content) {
-          // content === null -> the app uses its built-in defaults (identical to the seed)
+        var pSquads = window.LEGA_loadSquads ? window.LEGA_loadSquads() : Promise.resolve(null);
+        Promise.all([window.LEGA_loadContent(), pSquads]).then(function (res) {
+          var content = res[0], squads = res[1];
+          // live squads (team_players) override the rosters; null -> built-in defaults
+          if (squads) { content = content || {}; content.rosters = squads; }
           window.LEGA_CONTENT = content;
           window.LEGA_MOUNT();
         });
