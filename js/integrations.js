@@ -124,14 +124,19 @@
     var list = newsList(); if (!list.length) return;
     if (document.getElementById("lw-article")) return;
     var node = e.target;
-    for (var i = 0; i < 7 && node && node !== document.body; i++) {
-      if (node.querySelector) {
-        var h3 = node.querySelector("h3");
-        if (h3) {
-          var t = h3.textContent.trim();
-          var item = null;
-          for (var j = 0; j < list.length; j++) { if (String(list[j].title || "").trim() === t) { item = list[j]; break; } }
-          if (item) { e.preventDefault(); openArticle(item); return; }
+    // Walk up to the nearest element that wraps exactly ONE <h3> (a single
+    // news card). If we reach a container with several <h3>s, the click was
+    // not on a card — bail (prevents matching an unrelated headline).
+    for (var i = 0; i < 8 && node && node !== document.body; i++) {
+      if (node.querySelectorAll) {
+        var h3s = node.querySelectorAll("h3");
+        if (h3s.length === 1) {
+          var t = h3s[0].textContent.trim();
+          for (var j = 0; j < list.length; j++) {
+            if (String(list[j].title || "").trim() === t) { e.preventDefault(); openArticle(list[j]); return; }
+          }
+        } else if (h3s.length > 1) {
+          return;
         }
       }
       node = node.parentNode;
