@@ -237,24 +237,40 @@
 '  </sc-if>\n' +
 '</div>';
 
+  // MAX_RESULTS small + a short input debounce keep the dropdown cheap to
+  // render: while the user is mid-type the rows are not built at all (only the
+  // input re-renders), and they appear once typing settles. This is what keeps
+  // search responsive on low-end devices (40 badge-rows/keystroke used to hang).
+  var PP_MAX_RESULTS = 8;
+  var PP_DEBOUNCE_MS = 140;
+
   class PlayerPicker extends DCLogic {
-    constructor(props) { super(props); this.state = { query: "", open: false }; }
+    constructor(props) { super(props); this.state = { query: "", open: false, settled: true }; }
     renderVals() {
       const players = this.props.players || [];
       const q = (this.state.query || "").trim().toLowerCase();
       let list = players;
       if (q) list = players.filter(p => String(p.name).toLowerCase().indexOf(q) >= 0);
-      const results = list.slice(0, 40).map(p => ({ name: p.name, team: p.team, pick: () => { this.setState({ query: "", open: false }); if (this.props.onpick) this.props.onpick(p.name); } }));
+      // only build/show the result rows once typing has settled
+      const ready = this.state.open && q.length > 0 && this.state.settled;
+      const results = ready
+        ? list.slice(0, PP_MAX_RESULTS).map(p => ({ name: p.name, team: p.team, pick: () => { clearTimeout(this._t); this.setState({ query: "", open: false, settled: true }); if (this.props.onpick) this.props.onpick(p.name); } }))
+        : [];
       const val = this.props.value || "";
       const found = players.find(p => p.name === val);
       return {
-        query: this.state.query, open: this.state.open && q.length > 0,
-        results: results, noResults: q.length > 0 && results.length === 0,
+        query: this.state.query, open: ready,
+        results: results, noResults: ready && results.length === 0,
         hasValue: !!val, value: val, valTeam: found ? found.team : val,
         ph: val ? "Type to change…" : (this.props.placeholder || "Search players…"),
-        onInput: (e) => this.setState({ query: e.target.value, open: true }),
-        onFocus: () => this.setState({ open: true }),
-        clear: () => { this.setState({ query: "" }); if (this.props.onpick) this.props.onpick(""); },
+        onInput: (e) => {
+          const v = e.target.value;
+          this.setState({ query: v, open: true, settled: false });
+          clearTimeout(this._t);
+          this._t = setTimeout(() => this.setState({ settled: true }), PP_DEBOUNCE_MS);
+        },
+        onFocus: () => this.setState({ open: true, settled: true }),
+        clear: () => { clearTimeout(this._t); this.setState({ query: "", settled: true }); if (this.props.onpick) this.props.onpick(""); },
       };
     }
   }
