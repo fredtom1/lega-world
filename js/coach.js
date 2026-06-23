@@ -114,7 +114,7 @@
     var row = null;
     try { row = await window.LEGA_coach.myRow(); } catch (e) {}
     if (!row) { showRequestTeam(); return; }
-    if (row.status === "active") { TEAM = row.team; showPortal(); return; }
+    if (row.status === "active") { TEAM = row.team; if (window.LEGA_profile) window.LEGA_profile.upsert("coach").catch(function(){}); showPortal(); return; }
     if (row.status === "rejected") { shell([signOutBtn()], statusCard("Access declined", "The league office didn't approve this account for " + (row.team || "a team") + ". Contact them if you think this is a mistake.")); return; }
     shell([signOutBtn()], statusCard("Awaiting approval", "Your request to manage " + (row.team || "your team") + " is pending. The league office will activate your access shortly. Refresh this page after they approve."));
   }
@@ -188,7 +188,10 @@
     // --- make an offer ---
     var offer = el("div", { class: "card" }, [el("h2", null, ["Make an offer"]), el("p", { class: "sub" }, ["Request a player from another club. Their coach must accept before the move happens."])]);
     var playerSel = el("select", { class: "f", style: "flex:2;min-width:200px" }, [el("option", { value: "" }, ["Loading players…"])]);
-    var typeSel = el("select", { class: "f", style: "width:150px" }, ["Permanent", "Loan", "Free"].map(function (t) { return el("option", { value: t }, [t]); }));
+    var typeSel = el("select", { class: "f", style: "width:150px" }, ["Permanent", "Loan", "Free transfer"].map(function (t) { return el("option", { value: t }, [t]); }));
+    var feeIn = el("input", { class: "f", type: "number", min: "0", placeholder: "0", style: "width:140px" });
+    var seasonsIn = el("input", { class: "f", type: "number", min: "1", value: "1", style: "width:110px" });
+    var emailIn = el("input", { class: "f", type: "email", placeholder: "player@email.com", style: "min-width:220px;flex:1" });
     var offerMsg = el("div", { class: "muted" });
     rosterSource().then(function (src) {
       var others = src.players.filter(function (p) { return p.team !== TEAM; });
@@ -204,11 +207,16 @@
     offer.appendChild(el("div", { class: "row", style: "align-items:flex-end" }, [
       el("div", { style: "flex:2;min-width:200px" }, [el("label", { class: "fl" }, ["Player"]), playerSel]),
       el("div", null, [el("label", { class: "fl" }, ["Type"]), typeSel]),
+      el("div", null, [el("label", { class: "fl" }, ["Fee"]), feeIn]),
+      el("div", null, [el("label", { class: "fl" }, ["Seasons"]), seasonsIn]),
+      el("div", { style: "flex:1;min-width:220px" }, [el("label", { class: "fl" }, ["Player email"]), emailIn]),
       btn("Submit offer", function () {
         if (!playerSel.value) { offerMsg.textContent = "Choose a player."; return; }
+        if (!emailIn.value.trim()) { offerMsg.textContent = "Add the player's email so the contract can be sent."; return; }
         var parts = playerSel.value.split("|||"), player = parts[0], from = parts[1];
         offerMsg.textContent = "Submitting…";
-        window.LEGA_transfers.request(player, from, TEAM, typeSel.value).then(function () {
+        var submit = window.LEGA_transfers.requestContract || window.LEGA_transfers.request;
+        submit(player, from, TEAM, typeSel.value, feeIn.value, emailIn.value.trim(), seasonsIn.value).then(function () {
           offerMsg.textContent = ""; toast("Offer sent to " + from); if (window.__paint) window.__paint();
         }).catch(function (e) { offerMsg.textContent = e.message; });
       }, "gold")
@@ -229,9 +237,9 @@
       inc.forEach(function (r) {
         iw.appendChild(el("div", { class: "item" }, [
           el("div", { class: "hd" }, [el("span", { style: "font-weight:700" }, [r.player]), el("span", { class: "badge", style: "background:#E8A91C" }, [r.status])]),
-          el("div", { class: "muted", style: "margin:6px 0 10px" }, [TEAM + "  →  " + r.to_team + "   ·   " + (r.type || "Permanent")]),
+          el("div", { class: "muted", style: "margin:6px 0 10px" }, [TEAM + "  →  " + r.to_team + "   ·   " + (r.type || "Permanent") + "   ·   fee " + (r.fee || 0)]),
           el("div", { class: "row" }, [
-            btn("Accept", function () { window.LEGA_transfers.accept(r.id).then(function () { toast("Transfer completed"); if (window.__paint) window.__paint(); }).catch(function (e) { toast(e.message, true); }); }, "teal"),
+            btn("Agree terms", function () { window.LEGA_transfers.accept(r.id).then(function () { toast("Seller agreement sent to player"); if (window.__paint) window.__paint(); }).catch(function (e) { toast(e.message, true); }); }, "teal"),
             el("button", { class: "x", onclick: function () { window.LEGA_transfers.reject(r.id).then(function () { toast("Rejected"); if (window.__paint) window.__paint(); }).catch(function (e) { toast(e.message, true); }); } }, ["Reject"])
           ])
         ]));

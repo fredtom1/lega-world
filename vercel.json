@@ -3,6 +3,8 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/coach", "destination": "/coach.html" }
+    { "source": "/coach", "destination": "/coach.html" },
+    { "source": "/player", "destination": "/player.html" },
+    { "source": "/login", "destination": "/login.html" }
   ]
 }

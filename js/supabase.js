@@ -140,6 +140,10 @@
   };
   window.LEGA_isAdmin = function () { return rpc("is_admin").catch(function () { return false; }); };
 
+  window.LEGA_profile = {
+    upsert: function (role, fullName) { return rpc("upsert_my_profile", { p_role: role || "visitor", p_full_name: fullName || null }); }
+  };
+
   window.LEGA_coach = {
     myRow: function () {
       return getClient().then(function (sb) {
@@ -188,9 +192,31 @@
 
   window.LEGA_transfers = {
     request: function (player, from, to, type) { return rpc("request_transfer", { p_player: player, p_from: from, p_to: to, p_type: type || "Permanent" }); },
+    requestContract: function (player, from, to, type, fee, playerEmail, seasons) {
+      return rpc("request_transfer_contract", {
+        p_player: player,
+        p_from: from,
+        p_to: to,
+        p_type: type || "Permanent",
+        p_fee: Number(fee || 0),
+        p_player_email: playerEmail,
+        p_seasons: Number(seasons || 1)
+      });
+    },
     accept: function (id) { return rpc("accept_transfer", { p_request: id }); },
     reject: function (id) { return rpc("reject_transfer", { p_request: id }); },
     all: function () { return getClient().then(function (sb) { return sb.from("transfer_requests").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
     log: function () { return getClient().then(function (sb) { return sb.from("transfers_log").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); }
+  };
+
+  window.LEGA_contracts = {
+    mine: function () {
+      return getClient().then(function (sb) {
+        return sb.from("player_contracts").select("*").order("created_at", { ascending: false })
+          .then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; });
+      });
+    },
+    accept: function (id, seasons) { return rpc("accept_player_contract", { p_contract: id, p_seasons: Number(seasons || 1) }); },
+    reject: function (id) { return rpc("reject_player_contract", { p_contract: id }); }
   };
 })();

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lega World — Player contracts</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" />
+  <link rel="icon" href="assets/logo/lega-world-logo-primary.svg" />
+  <link rel="stylesheet" href="css/site.css?v=20260623g" />
+  <style>
+    :root{--purple:#48246C;--purple-dark:#2C1545;--teal:#009C9C;--teal-d:#067C7C;--gold:#F0B418;--sky:#90C0E4;--canvas:#E4F0F0;--ink:#281F38;--muted:#5C5470;--line:#E2ECEE}
+    body{margin:0;font-family:'Montserrat',system-ui,sans-serif;background:var(--canvas);color:var(--ink)}
+    .wrap{max-width:920px;margin:0 auto;padding:0 18px}
+    header{background:var(--purple-dark);color:#fff;position:sticky;top:0;z-index:20}
+    .bar{display:flex;align-items:center;gap:12px;min-height:62px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:9px;font-weight:800}.brand img{height:26px}.brand .a{font-weight:500}.brand .b{color:var(--gold)}
+    .spacer{flex:1}.pill{display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:999px;text-decoration:none}
+    .pill.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}.pill.teal{background:var(--teal);color:#fff}.pill.sm{font-size:12px;padding:7px 12px}.pill:disabled{opacity:.5;cursor:default}
+    main{padding:24px 0 80px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:18px}
+    .card h2{margin:0 0 4px;font-size:20px;letter-spacing:-.01em}.card .sub{margin:0 0 16px;color:var(--muted);font-size:14px;font-weight:500}
+    label.fl{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 5px}
+    input.f,select.f,textarea.f{width:100%;font-family:inherit;font-size:14px;font-weight:500;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#FAFCFC;color:var(--ink)}
+    input.f:focus,select.f:focus{outline:2px solid var(--teal);border-color:var(--teal)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#FBFCFD;margin-bottom:10px}
+    .item .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}.badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;padding:3px 9px;border-radius:999px}
+    .muted{color:var(--muted);font-size:13px;font-weight:500}.err{color:#C0392B;font-size:13px;font-weight:600;margin-top:8px;min-height:18px}.ok{color:#067C7C;font-size:13px;font-weight:700;margin-top:8px;min-height:18px}
+    .login{max-width:430px;margin:54px auto}.seg{display:flex;gap:4px;background:#EAF3F3;border-radius:999px;padding:4px;margin-bottom:18px;width:max-content;max-width:100%}
+    .seg button{border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;color:var(--muted)}.seg button.active{background:#fff;color:var(--purple)}
+    #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);color:#fff;font-weight:700;font-size:14px;padding:11px 20px;border-radius:999px;box-shadow:0 8px 30px rgba(6,124,124,.4);opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:50}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  </style>
+  <script src="config.js?v=20260623g"></script>
+  <script src="js/supabase.js?v=20260623g"></script>
+</head>
+<body>
+  <div id="toast"></div>
+  <div id="player"></div>
+  <script src="js/player.js?v=20260623g"></script>
+</body>
+</html>

@@ -176,3 +176,25 @@ enforced by the database.
 
 Security note: the transfer "apply" runs inside a Postgres `SECURITY DEFINER` function so the
 cross‑club move is performed safely — neither coach can write the other club's squad directly.
+
+---
+
+## 9. Role portal and player contracts (Phase 3)
+
+Run **`supabase-phase3.sql`** after Phase 2. It adds the role/category portal and the player
+contract step for transfers.
+
+Routes:
+- `/login` - role dropdown for Visitor, Coach / Team Owner, Player, Scout, and Referee.
+- `/coach` - coach/team owner portal for squad management and transfer offers.
+- `/player` - player contract portal.
+
+Transfer flow:
+1. The buying coach opens `/coach`, chooses a player from another team, adds fee, seasons, and the player's email.
+2. The selling coach sees the incoming offer and clicks **Agree terms** or Reject.
+3. If agreed, the contract appears in `/player` for the email used in the offer.
+4. The player accepts the number of seasons or rejects the offer.
+5. Only after player acceptance does the player move team and the transfer history update.
+
+The public Transfers form now sends people into the coach portal, because real transfer moves need
+the buying coach, selling coach, and player approval chain.

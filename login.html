@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lega World — Portal login</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" />
+  <link rel="icon" href="assets/logo/lega-world-logo-primary.svg" />
+  <link rel="stylesheet" href="css/site.css?v=20260623g" />
+  <style>
+    body{font-family:Montserrat,system-ui,sans-serif;background:#E4F0F0;margin:0;color:#281F38}
+    .portal-shell{min-height:100vh;background:linear-gradient(135deg,#2C1545 0%,#48246C 45%,#067C7C 100%);padding:28px}
+    .portal-card{max-width:720px;margin:8vh auto;background:#fff;border-radius:24px;padding:30px;box-shadow:0 24px 70px rgba(44,21,69,.28)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:24px;margin-bottom:18px}
+    .brand img{width:36px;height:36px}.brand b{color:#009C9C}
+    h1{font-size:34px;line-height:1.05;margin:0 0 8px;letter-spacing:-.02em}
+    p{color:#5C5470;font-weight:500;line-height:1.55}
+    label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#48246C;margin:18px 0 8px}
+    select,.portal-card input{width:100%;padding:14px;border:1px solid #E2ECEE;border-radius:12px;font:600 15px Montserrat;background:#FAFCFC;color:#281F38}
+    button,.linkbtn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;padding:13px 22px;font:800 15px Montserrat;cursor:pointer;text-decoration:none}
+    button{background:#009C9C;color:#fff}.linkbtn{background:#48246C;color:#fff}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
+    .role{background:#F3EEFA;border:1px solid #CFC0E0;border-radius:16px;padding:14px;font-weight:700}
+    .muted{font-size:13px;color:#5C5470}
+  </style>
+</head>
+<body>
+  <div class="portal-shell">
+    <div class="portal-card">
+      <div class="brand"><img src="assets/logo/lega-world-logo-primary.svg" alt="">LEGA<b>WORLD</b></div>
+      <h1>Choose your portal</h1>
+      <p>Visitors browse the site. Coaches and team owners manage squads and transfers. Players review contracts. Scouts use analytics.</p>
+      <label for="role">I am signing in as</label>
+      <select id="role">
+        <option value="visitor">Visitor</option>
+        <option value="coach">Coach / Team owner</option>
+        <option value="player">Player</option>
+        <option value="scout">Scout</option>
+        <option value="referee">Referee</option>
+      </select>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button id="continue">Continue</button>
+        <a class="linkbtn" href="index.html">Back to website</a>
+      </div>
+      <div class="grid">
+        <div class="role">Coach: squads, offers, incoming requests</div>
+        <div class="role">Player: contract offers and seasons</div>
+        <div class="role">Scout: player analytics over time</div>
+        <div class="role">Visitor: public website</div>
+      </div>
+      <p class="muted">Referee tools are reserved for the match-official workflow coming next.</p>
+    </div>
+  </div>
+  <script src="js/login.js?v=20260623g"></script>
+</body>
+</html>

@@ -30,10 +30,48 @@
   var anchor = '<span onClick="{{ submitReg }}"';
   if (template.indexOf(anchor) >= 0) template = template.replace(anchor, PLAYERS_FIELD + anchor);
 
-  // discreet "Coach / owner login" link in the footer (not in the public nav)
+  // Premier League-style public player directory: search, club filter, dense rows.
+  var PLAYER_DIRECTORY =
+    '<sc-if value="{{ playerNoSel }}" hint-placeholder-val="{{ true }}">' +
+    '<div style="background:#2C1545;color:#fff;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px rgba(44,21,69,.18);margin:18px 0 0;">' +
+      '<div style="height:12px;background:linear-gradient(90deg,#48246C,#009C9C,#2BD6D6);"></div>' +
+      '<div style="padding:22px 24px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
+        '<div style="flex:1;min-width:250px;position:relative;"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;color:#A09AAE;">⌕</span><input value="{{ playerSearch }}" onInput="{{ onPlayerSearch }}" placeholder="Search players" style="width:100%;font-size:16px;font-weight:600;padding:15px 16px 15px 48px;border:1px solid rgba(255,255,255,.36);border-radius:14px;background:#2C0630;color:#fff;" /></div>' +
+        '<select value="{{ playerClubFilter }}" onChange="{{ onPlayerClubFilter }}" style="min-width:190px;font-size:15px;font-weight:700;padding:14px 16px;border:1px solid rgba(255,255,255,.36);border-radius:14px;background:#2C0630;color:#fff;"><option value="">All clubs</option><sc-for list="{{ playerClubOptions }}" as="club" hint-placeholder-count="6"><option value="{{ club }}">{{ club }}</option></sc-for></select>' +
+        '<div style="font-size:13px;font-weight:700;color:#D7ECF7;">{{ playerShowingCount }} players shown</div>' +
+      '</div>' +
+      '<div style="padding:0 24px 24px;overflow-x:auto;">' +
+        '<div style="min-width:760px;background:#310039;border-radius:18px;padding:0 24px;">' +
+          '<div style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr .7fr .7fr .7fr;gap:18px;align-items:center;padding:18px 0;color:#fff;font-size:13px;font-weight:800;">' +
+            '<div>Player</div><div>Club</div><div>Position</div><div style="text-align:center;">Goals</div><div style="text-align:center;">Assists</div><div style="text-align:right;">Profile</div>' +
+          '</div>' +
+          '<sc-for list="{{ playerDirectory }}" as="row" hint-placeholder-count="8">' +
+            '<div onClick="{{ row.pick }}" role="button" tabindex="0" style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr .7fr .7fr .7fr;gap:18px;align-items:center;padding:16px 0;border-top:1px solid rgba(255,255,255,.13);cursor:pointer;">' +
+              '<div style="display:flex;align-items:center;gap:14px;min-width:0;"><span style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#F0B418,#009C9C);display:flex;align-items:center;justify-content:center;flex:none;font-weight:900;color:#fff;font-size:18px;">{{ row.initial }}</span><div style="min-width:0;"><div style="font-size:17px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div><div style="font-size:12px;color:#D7ECF7;font-weight:600;margin-top:3px;">Lega World player</div></div></div>' +
+              '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><dc-import name="TeamBadge" team="{{ row.team }}" size="30" hint-size="30px,30px"></dc-import><span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.team }}</span></div>' +
+              '<div style="font-size:14px;font-weight:700;color:#fff;">{{ row.position }}</div>' +
+              '<div style="text-align:center;font-size:15px;font-weight:800;color:#F0B418;">{{ row.goals }}</div>' +
+              '<div style="text-align:center;font-size:15px;font-weight:800;color:#90C0E4;">{{ row.assists }}</div>' +
+              '<div style="text-align:right;font-size:13px;font-weight:800;color:#fff;">View ›</div>' +
+            '</div>' +
+          '</sc-for>' +
+          '<sc-if value="{{ playerRowsEmpty }}" hint-placeholder-val="{{ false }}"><div style="border-top:1px solid rgba(255,255,255,.13);padding:28px 0;color:#D7ECF7;font-weight:600;text-align:center;">No players match that search.</div></sc-if>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '</sc-if>';
+  var playersStart = '<sc-if value="{{ playerNoSel }}" hint-placeholder-val="{{ true }}">';
+  var playersNext = '\n\n    <sc-if value="{{ playerHasSel }}" hint-placeholder-val="{{ false }}">';
+  var playersStartAt = template.indexOf(playersStart);
+  var playersNextAt = playersStartAt >= 0 ? template.indexOf(playersNext, playersStartAt) : -1;
+  if (playersStartAt >= 0 && playersNextAt > playersStartAt) {
+    template = template.slice(0, playersStartAt) + PLAYER_DIRECTORY + template.slice(playersNextAt);
+  }
+
+  // discreet portal login link in the footer (not in the public nav)
   var FOOT = '<div style="color:#90C0E4;font-size:13px;font-weight:500;">Ekiti &middot; Lagos &middot; Anambra, Nigeria &middot; Founded 2013</div>';
-  var COACH_LINK = '<a href="coach.html" style="color:#fff;font-size:12px;font-weight:700;text-decoration:none;background:#009C9C;padding:7px 14px;border-radius:999px;">Coach / owner login</a>';
-  if (template.indexOf(FOOT) >= 0) template = template.replace(FOOT, '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;">' + COACH_LINK + FOOT + '</div>');
+  var PORTAL_LINK = '<a href="login.html" style="color:#fff;font-size:12px;font-weight:700;text-decoration:none;background:#009C9C;padding:7px 14px;border-radius:999px;">Portal login</a>';
+  if (template.indexOf(FOOT) >= 0) template = template.replace(FOOT, '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;">' + PORTAL_LINK + FOOT + '</div>');
 
   // provide the bindings for the new field
   var origSignRegVals = proto.signRegVals;
@@ -41,6 +79,41 @@
     var o = origSignRegVals.call(this);
     o.regPlayers = (this.state.regForm && this.state.regForm.players) || "";
     o.onRegPlayers = this.setField("regForm", "players");
+    return o;
+  };
+
+  var origPlayersVals = proto.playersVals;
+  proto.playersVals = function () {
+    var o = origPlayersVals.call(this);
+    var search = String(this.state.playerSearch || "").trim().toLowerCase();
+    var club = this.state.playerClubFilter || "";
+    var clubs = Object.keys(this.rosters || {}).filter(function (t) { return ((this.rosters[t] || []).length > 0); }, this).sort();
+    var self = this;
+    var rows = (this.playerNames || []).map(function (n) {
+      var p = self.players[n] || {};
+      var team = p.mainTeam || (self.playerClubs && self.playerClubs(n)[0]) || "Unlisted";
+      return {
+        name: n,
+        team: team,
+        position: self.positions[n] || "Unlisted",
+        goals: p.goals || 0,
+        assists: p.assists || 0,
+        initial: (n[0] || "?").toUpperCase(),
+        pick: function () { self.setState({ playerSel: n }); }
+      };
+    }).filter(function (r) {
+      if (club && r.team !== club) return false;
+      if (!search) return true;
+      return (r.name + " " + r.team + " " + r.position).toLowerCase().indexOf(search) >= 0;
+    });
+    o.playerSearch = this.state.playerSearch || "";
+    o.playerClubFilter = club;
+    o.playerClubOptions = clubs;
+    o.playerDirectory = rows.slice(0, 120);
+    o.playerRowsEmpty = rows.length === 0;
+    o.playerShowingCount = String(rows.length);
+    o.onPlayerSearch = function (e) { self.setState({ playerSearch: e.target.value }); };
+    o.onPlayerClubFilter = function (e) { self.setState({ playerClubFilter: e.target.value }); };
     return o;
   };
 
@@ -67,23 +140,21 @@
   };
 
   proto.submitTransfer = function () {
-    var f = this.state.txForm, self = this;
-    if (!f.player || !f.from || !f.to) { this.setState({ flash: "Add the player and both clubs to submit." }); return; }
-    function reset(msg) { self.setState({ txForm: { player: "", from: "", to: "", type: "Permanent", date: "" }, flash: msg }); }
-    if (configured()) {
-      window.LEGA_db.insert("transfer_requests", {
-        player: f.player, from_team: f.from, to_team: f.to, type: f.type, window_date: f.date || "TBC"
-      }).then(function () { reset("Submitted to the Transfer Policy Department for review."); })
-        .catch(function (e) { self.setState({ flash: "Could not submit right now: " + e.message }); });
-    } else {
-      var rec = { player: f.player, from: f.from, to: f.to, type: f.type, date: f.date || "TBC", status: "Pending review" };
-      var pt = [rec].concat(self.state.pendT); self.save("pendT", pt); self.setState({ pendT: pt });
-      reset("Submitted to the Transfer Policy Department for review.");
-    }
+    this.setState({ flash: "Transfer requests now happen inside the Coach / Team Owner portal so the selling club and player can approve the move." });
+    if (typeof window !== "undefined") setTimeout(function () { window.location.href = "coach.html"; }, 900);
   };
 
   // re-register the App with the patched template
   window.DC.register("App", template, Component);
+
+  // Route the old public Sign in CTA to the role/category portal.
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.textContent && t.textContent.trim() === "Sign in") {
+      var inHeader = t.closest && t.closest("header");
+      if (inHeader) { e.preventDefault(); e.stopPropagation(); window.location.href = "login.html"; }
+    }
+  }, true);
 
   /* ---- 3. News article reader ---- */
   function newsList() {

@@ -9,6 +9,16 @@
   status = 200
 
 [[redirects]]
-  from = "/coach"
-  to = "/coach.html"
-  status = 200
+from = "/coach"
+to = "/coach.html"
+status = 200
+
+[[redirects]]
+from = "/player"
+to = "/player.html"
+status = 200
+
+[[redirects]]
+from = "/login"
+to = "/login.html"
+status = 200
