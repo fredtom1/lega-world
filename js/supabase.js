@@ -166,7 +166,13 @@
     // admin: list all coaches / set a coach's team + status
     listAll: function () { return getClient().then(function (sb) { return sb.from("coaches").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
     setStatus: function (userId, team, status) {
-      if (window.LEGA_coach.setStatusRpc) return window.LEGA_coach.setStatusRpc(userId, team, status);
+      return window.LEGA_coach.setStatusRpc(userId, team, status).catch(function (e) {
+        var msg = String(e && e.message || e || "");
+        if (msg.indexOf("set_coach_status") < 0 && msg.indexOf("Could not find the function") < 0) throw e;
+        return window.LEGA_coach.setStatusDirect(userId, team, status);
+      });
+    },
+    setStatusDirect: function (userId, team, status) {
       return getClient().then(function (sb) {
         return sb.from("coaches").update({ team: team, status: status }).eq("user_id", userId).select("*").maybeSingle()
           .then(function (r) {
