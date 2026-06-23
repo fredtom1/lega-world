@@ -94,6 +94,29 @@ end; $$;
 
 grant execute on function public.upsert_my_profile(text, text) to authenticated;
 
+create or replace function public.set_coach_status(p_user_id uuid, p_team text, p_status text)
+  returns public.coaches language plpgsql security definer set search_path = public as $$
+declare c public.coaches%rowtype;
+begin
+  if not is_admin() then
+    raise exception 'Only a league admin can approve coaches. Add your email to the admins table first.';
+  end if;
+  if p_status not in ('pending', 'active', 'rejected') then
+    raise exception 'Invalid coach status: %', p_status;
+  end if;
+  update coaches
+  set team = nullif(p_team, ''),
+      status = p_status
+  where user_id = p_user_id
+  returning * into c;
+  if not found then
+    raise exception 'Coach account not found';
+  end if;
+  return c;
+end; $$;
+
+grant execute on function public.set_coach_status(uuid, text, text) to authenticated;
+
 create or replace function public.request_transfer_contract(
   p_player text,
   p_from text,

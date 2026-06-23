@@ -198,3 +198,7 @@ Transfer flow:
 
 The public Transfers form now sends people into the coach portal, because real transfer moves need
 the buying coach, selling coach, and player approval chain.
+
+If coach approval shows a success toast but the coach still sees **Awaiting approval**, run
+`supabase-admin-fix.sql` once. That means the signed-in email was not yet in the `admins` table,
+so Supabase blocked the update even though the old UI did not report it clearly.

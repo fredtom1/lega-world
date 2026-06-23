@@ -141,6 +141,9 @@
   ];
 
   async function showApp() {
+    var ok = false;
+    try { ok = await window.LEGA_isAdmin(); } catch (e) { ok = false; }
+    if (!ok) { showNotAdmin(); return; }
     root.innerHTML = "";
     root.appendChild(header(true));
     await loadAll();
@@ -157,6 +160,19 @@
     }
     window.__paint = paint;
     paint();
+  }
+
+  function showNotAdmin() {
+    root.innerHTML = "";
+    root.appendChild(header(false));
+    root.appendChild(el("div", { class: "wrap" }, [
+      el("div", { class: "card", style: "margin-top:24px;max-width:720px" }, [
+        el("h2", null, ["League admin access needed"]),
+        el("p", { class: "sub" }, ["You are signed in, but this email is not in the league admin list yet. That is why coach approvals can look like they worked while the coach still stays pending."]),
+        el("div", { class: "banner" }, ["Run the admin-fix SQL in Supabase, then sign out and sign back in here."]),
+        el("button", { class: "pill ghost sm", onclick: signOut }, ["Sign out"])
+      ])
+    ]));
   }
 
   async function loadAll() {

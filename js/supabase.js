@@ -166,10 +166,18 @@
     // admin: list all coaches / set a coach's team + status
     listAll: function () { return getClient().then(function (sb) { return sb.from("coaches").select("*").order("created_at", { ascending: false }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data || []; }); }); },
     setStatus: function (userId, team, status) {
+      if (window.LEGA_coach.setStatusRpc) return window.LEGA_coach.setStatusRpc(userId, team, status);
       return getClient().then(function (sb) {
-        return sb.from("coaches").update({ team: team, status: status }).eq("user_id", userId)
-          .then(function (r) { if (r.error) throw new Error(r.error.message); return r; });
+        return sb.from("coaches").update({ team: team, status: status }).eq("user_id", userId).select("*").maybeSingle()
+          .then(function (r) {
+            if (r.error) throw new Error(r.error.message);
+            if (!r.data) throw new Error("Nothing changed. Your account is not authorized as league admin yet. Add this email to the admins table, then approve again.");
+            return r.data;
+          });
       });
+    },
+    setStatusRpc: function (userId, team, status) {
+      return rpc("set_coach_status", { p_user_id: userId, p_team: team, p_status: status });
     }
   };
 
