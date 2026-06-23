@@ -34,7 +34,13 @@
       this._scheduler = null;
     }
     setState(partial) {
-      Object.assign(this.state, partial || {});
+      partial = partial || {};
+      var changed = false;
+      for (var k in partial) {
+        if (this.state[k] !== partial[k]) { changed = true; break; }
+      }
+      if (!changed) return;
+      Object.assign(this.state, partial);
       if (this._scheduler) this._scheduler();
     }
     renderVals() { return {}; }
