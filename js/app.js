@@ -724,5 +724,18 @@
     }, true);
   }
 
-  window.LEGA_MOUNT = function () { installImageFallback(); return DC.mount("#app", "App", {}); };
+  window.LEGA_MOUNT = function () {
+    installImageFallback();
+    var prev = window.__LEGA_ROOT;
+    var root = DC.mount("#app", "App", {});
+    window.__LEGA_ROOT = root;
+    // When re-mounting (live Supabase data arriving after the instant first
+    // render) carry the UI state over, so the user isn't bounced back to Home
+    // or made to lose their current tab / comparison selections.
+    if (prev && prev.state && root && root.setState) {
+      var keep = Object.assign({}, prev.state); delete keep.flash;
+      root.setState(keep);
+    }
+    return root;
+  };
 })();

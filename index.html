@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" />
 
   <link rel="icon" href="assets/logo/lega-world-logo-primary.svg" />
-  <link rel="stylesheet" href="css/site.css?v=20260623b" />
+  <link rel="stylesheet" href="css/site.css?v=20260623c" />
 </head>
 <body>
   <div id="app"></div>
@@ -21,30 +21,42 @@
   <!-- runtime + components + app (no build step, no framework).
        ?v= is a cache-buster: bump it whenever a js/css file changes so
        returning visitors fetch the new code instead of a stale cached copy. -->
-  <script src="js/dc-runtime.js?v=20260623b"></script>
-  <script src="js/components.js?v=20260623b"></script>
+  <script src="js/dc-runtime.js?v=20260623c"></script>
+  <script src="js/components.js?v=20260623c"></script>
 
   <!-- data: config + bundled defaults + Supabase data layer -->
-  <script src="config.js?v=20260623b"></script>
-  <script src="js/data.seed.js?v=20260623b"></script>
-  <script src="js/supabase.js?v=20260623b"></script>
+  <script src="config.js?v=20260623c"></script>
+  <script src="js/data.seed.js?v=20260623c"></script>
+  <script src="js/supabase.js?v=20260623c"></script>
 
   <!-- the application (original template + logic) -->
-  <script src="js/app.js?v=20260623b"></script>
+  <script src="js/app.js?v=20260623c"></script>
   <!-- Phase 1 behaviour: DB-backed registrations/transfers + news reader -->
-  <script src="js/integrations.js?v=20260623b"></script>
+  <script src="js/integrations.js?v=20260623c"></script>
 
-  <!-- boot: load content from Supabase (or fall back to defaults), then mount -->
+  <!-- boot: render instantly from bundled data, then upgrade from Supabase -->
   <script>
     (function () {
       function boot() {
+        // 1) Render IMMEDIATELY from the bundled data. The site must never wait
+        //    on the network to appear — a slow or stalled CDN (esm.sh) / Supabase
+        //    used to leave the page blank and frozen until the request resolved
+        //    (which never happens on a flaky connection).
+        window.LEGA_CONTENT = window.LEGA_CONTENT || null;
+        try { window.LEGA_MOUNT(); } catch (e) {}
+        // 2) In the background, upgrade to live Supabase data if/when it arrives.
+        //    Failures or stalls here no longer matter — the page already works.
+        if (!window.LEGA_loadContent) return;
         var pSquads = window.LEGA_loadSquads ? window.LEGA_loadSquads() : Promise.resolve(null);
-        Promise.all([window.LEGA_loadContent(), pSquads]).then(function (res) {
+        Promise.all([
+          window.LEGA_loadContent().catch(function () { return null; }),
+          pSquads.catch(function () { return null; })
+        ]).then(function (res) {
           var content = res[0], squads = res[1];
-          // live squads (team_players) override the rosters; null -> built-in defaults
           if (squads) { content = content || {}; content.rosters = squads; }
+          if (!content) return;                      // no live data -> keep instant render
           window.LEGA_CONTENT = content;
-          window.LEGA_MOUNT();
+          try { window.LEGA_MOUNT(); } catch (e) {}  // re-render with live data (state preserved)
         });
       }
       if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
