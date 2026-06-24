@@ -92,19 +92,22 @@
     var rows = (this.playerNames || []).map(function (n) {
       var p = self.players[n] || {};
       var team = p.mainTeam || (self.playerClubs && self.playerClubs(n)[0]) || "Unlisted";
+      var ex = playerExtra(n);
+      var aliases = ex && ex.aliases ? " " + ex.aliases.join(" ") : "";
       return {
         name: n,
         team: team,
         position: self.positions[n] || "Unlisted",
         goals: p.goals || 0,
         assists: p.assists || 0,
+        searchText: n + " " + team + " " + (self.positions[n] || "Unlisted") + aliases,
         initial: (n[0] || "?").toUpperCase(),
         pick: function () { self.setState({ playerSel: n }); }
       };
     }).filter(function (r) {
       if (club && r.team !== club) return false;
       if (!search) return true;
-      return (r.name + " " + r.team + " " + r.position).toLowerCase().indexOf(search) >= 0;
+      return (r.searchText || "").toLowerCase().indexOf(search) >= 0;
     });
     o.playerSearch = this.state.playerSearch || "";
     o.playerClubFilter = club;
@@ -120,8 +123,44 @@
   function challengeData() {
     return window.LEGA_CHALLENGE_DATA || {};
   }
+  function mergeExtra(base, patch) {
+    if (!base && !patch) return null;
+    var out = { teams: {}, records: [] };
+    [base || {}, patch || {}].forEach(function (src) {
+      Object.keys(src.teams || {}).forEach(function (team) { out.teams[team] = 1; });
+      ["ownGoals", "yellowCards", "redCards", "penaltyGoals", "penaltiesMissed", "deadBallGoals", "fouls", "cornerKicks", "offsides"].forEach(function (key) {
+        out[key] = Math.max(out[key] || 0, src[key] || 0);
+      });
+      (src.records || []).forEach(function (r) {
+        var sig = [r.competition, r.team, r.kind, r.val].join("|");
+        out._seen = out._seen || {};
+        if (!out._seen[sig]) {
+          out._seen[sig] = 1;
+          out.records.push(r);
+        }
+      });
+      if (src.aliases) out.aliases = (out.aliases || []).concat(src.aliases);
+    });
+    delete out._seen;
+    return out;
+  }
   function playerExtra(name) {
-    return (challengeData().playerExtras || {})[name] || null;
+    var cd = challengeData();
+    return mergeExtra((cd.playerExtras || {})[name], (cd.playerCorrections || {})[name]);
+  }
+  function playerExtraKeys() {
+    var cd = challengeData();
+    var keys = {};
+    Object.keys(cd.playerExtras || {}).forEach(function (name) { keys[name] = 1; });
+    Object.keys(cd.playerCorrections || {}).forEach(function (name) { keys[name] = 1; });
+    return Object.keys(keys);
+  }
+  function extraLine(ex) {
+    if (!ex) return "Challenge Place checked";
+    var total = (ex.ownGoals || 0) + (ex.yellowCards || 0) + (ex.redCards || 0) + (ex.deadBallGoals || 0);
+    if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0);
+    var teams = Object.keys(ex.teams || {});
+    return teams.length ? "Challenge roster: " + teams.join(" / ") : "Challenge Place checked";
   }
   function addRosterName(rosters, team, name) {
     if (!team || !name) return;
@@ -146,9 +185,9 @@
       (rosters[team] || []).forEach(function (name) { addRosterName(this.rosters, team, name); }, this);
     }, this);
     origBuildPlayers.call(this);
-    var extras = cd.playerExtras || {};
-    Object.keys(extras).forEach(function (name) {
-      var teams = Object.keys(extras[name].teams || {});
+    playerExtraKeys().forEach(function (name) {
+      var ex = playerExtra(name) || {};
+      var teams = Object.keys(ex.teams || {});
       var team = teams[0] || "Unlisted";
       ensurePlayer(this.players, name, team);
     }, this);
@@ -203,6 +242,34 @@
           return { label: labels[r.kind] || r.kind, val: r.val, team: r.team, comp: r.competition };
         });
       }
+    }
+    return o;
+  };
+
+  var origPlayersValsChallengeFix = proto.playersVals;
+  proto.playersVals = function () {
+    var o = origPlayersValsChallengeFix.call(this);
+    if (o.playerDirectory) {
+      o.playerDirectory = o.playerDirectory.map(function (row) {
+        row.extraLine = extraLine(playerExtra(row.name));
+        return row;
+      });
+    }
+    if (this.state.playerSel && o.pBioRows) {
+      var ex = playerExtra(this.state.playerSel);
+      var hasTeams = o.pBioRows.some(function (row) { return row.label === "Challenge teams"; });
+      if (ex && !hasTeams) {
+        o.pBioRows = o.pBioRows.concat([
+          { label: "Challenge teams", val: Object.keys(ex.teams || {}).join(" / ") || "Unlisted" }
+        ]);
+      }
+    }
+    if (o.pChallengeRows) {
+      o.pChallengeRows = o.pChallengeRows.map(function (row) {
+        if (row.label === "registered") row.label = "Roster listed";
+        if (row.label === "goals") row.label = "Goal";
+        return row;
+      });
     }
     return o;
   };

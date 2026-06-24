@@ -1075,7 +1075,7 @@
     "Lega league 2022 B": {
       "goals": [
         {
-          "name": "Khenzy MFM 8 Zamani",
+          "name": "Zamani",
           "team": "Golden Stars",
           "val": 8
         },
@@ -3268,6 +3268,80 @@
           "team": "Fc Eagles",
           "kind": "ownGoals",
           "val": 1
+        }
+      ]
+    }
+  },
+  "playerCorrections": {
+    "Raphel Ndubuidu": {
+      "aliases": [
+        "Raphael Ndubuidu"
+      ],
+      "teams": {
+        "WINNERS Team": 1,
+        "Fc Eagles": 1
+      },
+      "ownGoals": 1,
+      "yellowCards": 2,
+      "redCards": 1,
+      "deadBallGoals": 1,
+      "records": [
+        {
+          "competition": "Lega League 2020 (corona)",
+          "team": "WINNERS Team",
+          "kind": "ownGoals",
+          "val": 1
+        },
+        {
+          "competition": "Lega League 2022 A",
+          "team": "Fc Eagles",
+          "kind": "redCards",
+          "val": 1
+        },
+        {
+          "competition": "Gray cup 2022",
+          "team": "Fc Eagles",
+          "kind": "deadBallGoals",
+          "val": 1
+        },
+        {
+          "competition": "lega League Division 1 & 2",
+          "team": "WINNERS Team",
+          "kind": "yellowCards",
+          "val": 2
+        }
+      ]
+    },
+    "Martins": {
+      "teams": {
+        "MFM": 1
+      },
+      "records": [
+        {
+          "competition": "Challenge Place roster import",
+          "team": "MFM",
+          "kind": "registered",
+          "val": 1
+        }
+      ]
+    },
+    "Zamani": {
+      "teams": {
+        "Golden Stars": 1
+      },
+      "redCards": 1,
+      "records": [
+        {
+          "competition": "Lega cup 2022",
+          "team": "Golden Stars",
+          "kind": "redCards",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2022 B",
+          "team": "Golden Stars",
+          "kind": "goals",
+          "val": 8
         }
       ]
     }
