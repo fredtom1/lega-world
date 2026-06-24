@@ -47,7 +47,7 @@
           '</div>' +
           '<sc-for list="{{ playerDirectory }}" as="row" hint-placeholder-count="8">' +
             '<div onClick="{{ row.pick }}" role="button" tabindex="0" style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr .7fr .7fr .7fr;gap:18px;align-items:center;padding:16px 0;border-top:1px solid rgba(255,255,255,.13);cursor:pointer;">' +
-              '<div style="display:flex;align-items:center;gap:14px;min-width:0;"><span style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#F0B418,#009C9C);display:flex;align-items:center;justify-content:center;flex:none;font-weight:900;color:#fff;font-size:18px;">{{ row.initial }}</span><div style="min-width:0;"><div style="font-size:17px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div><div style="font-size:12px;color:#D7ECF7;font-weight:600;margin-top:3px;">Lega World player</div></div></div>' +
+              '<div style="display:flex;align-items:center;gap:14px;min-width:0;"><span style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#F0B418,#009C9C);display:flex;align-items:center;justify-content:center;flex:none;font-weight:900;color:#fff;font-size:18px;">{{ row.initial }}</span><div style="min-width:0;"><div style="font-size:17px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div><div style="font-size:12px;color:#D7ECF7;font-weight:600;margin-top:3px;">{{ row.extraLine }}</div></div></div>' +
               '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><dc-import name="TeamBadge" team="{{ row.team }}" size="30" hint-size="30px,30px"></dc-import><span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.team }}</span></div>' +
               '<div style="font-size:14px;font-weight:700;color:#fff;">{{ row.position }}</div>' +
               '<div style="text-align:center;font-size:15px;font-weight:800;color:#F0B418;">{{ row.goals }}</div>' +
@@ -114,6 +114,96 @@
     o.playerShowingCount = String(rows.length);
     o.onPlayerSearch = function (e) { self.setState({ playerSearch: e.target.value }); };
     o.onPlayerClubFilter = function (e) { self.setState({ playerClubFilter: e.target.value }); };
+    return o;
+  };
+
+  function challengeData() {
+    return window.LEGA_CHALLENGE_DATA || {};
+  }
+  function playerExtra(name) {
+    return (challengeData().playerExtras || {})[name] || null;
+  }
+  function addRosterName(rosters, team, name) {
+    if (!team || !name) return;
+    rosters[team] = rosters[team] || [];
+    if (rosters[team].indexOf(name) < 0) rosters[team].push(name);
+  }
+  function ensurePlayer(idx, name, team) {
+    if (!idx[name]) idx[name] = {
+      name: name, recs: [], goals: 0, assists: 0, seasons: {}, comps: {},
+      teams: {}, nSeasons: 0, nComps: 0, nTeams: 1, peak: 0, mainTeam: team
+    };
+    idx[name].teams[team] = 1;
+    if (!idx[name].mainTeam) idx[name].mainTeam = team;
+    return idx[name];
+  }
+
+  var origBuildPlayers = proto.buildPlayers;
+  proto.buildPlayers = function () {
+    var cd = challengeData();
+    var rosters = cd.rosters || {};
+    Object.keys(rosters).forEach(function (team) {
+      (rosters[team] || []).forEach(function (name) { addRosterName(this.rosters, team, name); }, this);
+    }, this);
+    origBuildPlayers.call(this);
+    var extras = cd.playerExtras || {};
+    Object.keys(extras).forEach(function (name) {
+      var teams = Object.keys(extras[name].teams || {});
+      var team = teams[0] || "Unlisted";
+      ensurePlayer(this.players, name, team);
+    }, this);
+    Object.values(this.players).forEach(function (p) {
+      p.nTeams = Object.keys(p.teams || {}).length;
+    });
+    this.playerNames = Object.keys(this.players).sort(function (a, b) {
+      return (this.players[b].goals || 0) - (this.players[a].goals || 0) || a.localeCompare(b);
+    }.bind(this));
+  };
+
+  var origPlayerClubs = proto.playerClubs;
+  proto.playerClubs = function (name) {
+    var clubs = origPlayerClubs.call(this, name);
+    var ex = playerExtra(name);
+    if (ex && ex.teams) {
+      Object.keys(ex.teams).forEach(function (team) {
+        if (clubs.indexOf(team) < 0) clubs.push(team);
+      });
+    }
+    return clubs;
+  };
+
+  var origPlayersValsExtra = proto.playersVals;
+  proto.playersVals = function () {
+    var o = origPlayersValsExtra.call(this);
+    if (o.playerDirectory) {
+      o.playerDirectory = o.playerDirectory.map(function (row) {
+        var ex = playerExtra(row.name);
+        row.extraLine = ex
+          ? "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0)
+          : "Challenge Place checked";
+        return row;
+      });
+    }
+    if (this.state.playerSel && o.pBioRows) {
+      var ex = playerExtra(this.state.playerSel);
+      if (ex) {
+        o.pBioRows = o.pBioRows.concat([
+          { label: "Own goals", val: ex.ownGoals || 0 },
+          { label: "Yellow cards", val: ex.yellowCards || 0 },
+          { label: "Red cards", val: ex.redCards || 0 },
+          { label: "Dead-ball goals", val: ex.deadBallGoals || 0 }
+        ]);
+        o.pChallengeRows = (ex.records || []).map(function (r) {
+          var labels = {
+            ownGoals: "Own goal", yellowCards: "Yellow card", redCards: "Red card",
+            deadBallGoals: "Dead-ball goal", penaltyGoals: "Penalty goal",
+            penaltiesMissed: "Penalty missed", fouls: "Foul", cornerKicks: "Corner",
+            offsides: "Offside"
+          };
+          return { label: labels[r.kind] || r.kind, val: r.val, team: r.team, comp: r.competition };
+        });
+      }
+    }
     return o;
   };
 
