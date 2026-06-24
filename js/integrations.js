@@ -123,6 +123,20 @@
   function challengeData() {
     return window.LEGA_CHALLENGE_DATA || {};
   }
+  function challengePlayerData() {
+    return window.LEGA_CHALLENGE_PLAYER_DATA || {};
+  }
+  function playerStatExtra(name) {
+    var t = (challengePlayerData().playerTotals || {})[name];
+    if (!t) return null;
+    var ex = { teams: t.teams || {}, records: [] };
+    var extras = t.extras || {};
+    Object.keys(extras).forEach(function (key) { ex[key] = extras[key]; });
+    (t.records || []).forEach(function (r) {
+      if (r.kind !== "goals" && r.kind !== "assists") ex.records.push(r);
+    });
+    return ex;
+  }
   function mergeExtra(base, patch) {
     if (!base && !patch) return null;
     var out = { teams: {}, records: [] };
@@ -146,13 +160,15 @@
   }
   function playerExtra(name) {
     var cd = challengeData();
-    return mergeExtra((cd.playerExtras || {})[name], (cd.playerCorrections || {})[name]);
+    return mergeExtra(mergeExtra((cd.playerExtras || {})[name], (cd.playerCorrections || {})[name]), playerStatExtra(name));
   }
   function playerExtraKeys() {
     var cd = challengeData();
+    var pd = challengePlayerData();
     var keys = {};
     Object.keys(cd.playerExtras || {}).forEach(function (name) { keys[name] = 1; });
     Object.keys(cd.playerCorrections || {}).forEach(function (name) { keys[name] = 1; });
+    Object.keys(pd.playerTotals || {}).forEach(function (name) { keys[name] = 1; });
     return Object.keys(keys);
   }
   function extraLine(ex) {
@@ -176,6 +192,49 @@
     if (!idx[name].mainTeam) idx[name].mainTeam = team;
     return idx[name];
   }
+  function recordExists(player, rec) {
+    var comp = String(rec.competition || "").toLowerCase();
+    return (player.recs || []).some(function (r) {
+      return String(r.season || "").toLowerCase() === comp && r.team === rec.team && r.kind === rec.kind && Number(r.val || 0) === Number(rec.val || 0);
+    });
+  }
+  function addChallengePlayerStats(app) {
+    var totals = challengePlayerData().playerTotals || {};
+    Object.keys(totals).forEach(function (name) {
+      var t = totals[name];
+      var teams = Object.keys(t.teams || {});
+      var player = ensurePlayer(app.players, name, teams[0] || "Unlisted");
+      (t.records || []).forEach(function (rec) {
+        if (rec.kind !== "goals" && rec.kind !== "assists") return;
+        if (recordExists(player, rec)) return;
+        player.recs.push({
+          team: rec.team, val: rec.val, season: rec.competition, short: rec.competition,
+          league: "Challenge Place", order: 1000, kind: rec.kind
+        });
+        if (rec.kind === "goals") {
+          player.goals = (player.goals || 0) + rec.val;
+          player.seasons[rec.competition] = (player.seasons[rec.competition] || 0) + rec.val;
+        } else {
+          player.assists = (player.assists || 0) + rec.val;
+        }
+        player.comps["Challenge Place"] = 1;
+        player.teams[rec.team] = 1;
+      });
+    });
+  }
+  function refreshPlayerMeta(players) {
+    Object.values(players).forEach(function (p) {
+      p.nSeasons = Object.keys(p.seasons || {}).length;
+      p.nComps = Object.keys(p.comps || {}).length;
+      p.nTeams = Object.keys(p.teams || {}).length;
+      p.peak = Math.max.apply(null, [0].concat(Object.values(p.seasons || {})));
+      var tg = {};
+      (p.recs || []).forEach(function (r) {
+        if (r.kind === "goals") tg[r.team] = (tg[r.team] || 0) + r.val;
+      });
+      p.mainTeam = Object.keys(tg).sort(function (a, b) { return tg[b] - tg[a]; })[0] || p.mainTeam;
+    });
+  }
 
   var origBuildPlayers = proto.buildPlayers;
   proto.buildPlayers = function () {
@@ -191,9 +250,8 @@
       var team = teams[0] || "Unlisted";
       ensurePlayer(this.players, name, team);
     }, this);
-    Object.values(this.players).forEach(function (p) {
-      p.nTeams = Object.keys(p.teams || {}).length;
-    });
+    addChallengePlayerStats(this);
+    refreshPlayerMeta(this.players);
     this.playerNames = Object.keys(this.players).sort(function (a, b) {
       return (this.players[b].goals || 0) - (this.players[a].goals || 0) || a.localeCompare(b);
     }.bind(this));
