@@ -24,9 +24,29 @@
     '<div><label style="{{ labelStyle }}">Players (one per line)</label>' +
     '<textarea value="{{ regPlayers }}" onInput="{{ onRegPlayers }}" placeholder="One player name per line" ' +
     'style="{{ inputStyle }};min-height:104px;resize:vertical;line-height:1.6;"></textarea>' +
-    '<div style="font-size:11px;color:#A09AAE;font-weight:600;margin-top:5px;">These become the team\'s squad once approved.</div></div>';
+    '<div style="font-size:11px;color:#A09AAE;font-weight:600;margin-top:5px;">These become the team\'s squad once approved.</div></div>' +
+    '<div><label style="{{ labelStyle }}">Player profile / photo links (optional)</label>' +
+    '<textarea value="{{ regPlayerPhotos }}" onInput="{{ onRegPlayerPhotos }}" placeholder="One per line: Player name - photo or profile link" ' +
+    'style="{{ inputStyle }};min-height:82px;resize:vertical;line-height:1.6;"></textarea>' +
+    '<div style="font-size:11px;color:#A09AAE;font-weight:600;margin-top:5px;">Use this for player photos or existing profile links until full file uploads are connected.</div></div>';
 
   var template = window.LEGA_APP_TEMPLATE;
+  var MOBILE_STYLE = '<style>.lw-mobile-menu{display:none}.lw-mobile-drawer{display:none}@media(max-width:760px){.lw-mobile-menu{display:flex}.lw-public-nav{display:none!important}.lw-mobile-drawer{display:block}}</style>';
+  template = MOBILE_STYLE + template;
+  template = template.replace('<nav style="', '<nav class="lw-public-nav" style="');
+  var headerAnchor = '<header ';
+  var MOBILE_MENU =
+    '<button class="lw-mobile-menu" onClick="{{ toggleMobileMenu }}" aria-label="Open menu" style="position:fixed;left:12px;top:12px;z-index:80;width:44px;height:44px;border:0;border-radius:999px;background:#2C1545;color:#fff;align-items:center;justify-content:center;font-size:26px;box-shadow:0 10px 28px rgba(44,21,69,.3);">☰</button>' +
+    '<sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">' +
+      '<div class="lw-mobile-drawer" style="position:fixed;inset:0;z-index:79;background:rgba(44,21,69,.55);backdrop-filter:blur(4px);">' +
+        '<div style="width:min(82vw,320px);height:100%;background:#fff;padding:72px 18px 24px;box-shadow:20px 0 60px rgba(44,21,69,.25);">' +
+          '<button onClick="{{ closeMobileMenu }}" style="position:absolute;left:18px;top:18px;width:42px;height:42px;border-radius:999px;border:1px solid #E2ECEE;background:#fff;color:#48246C;font-size:24px;">×</button>' +
+          '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#067C7C;margin-bottom:12px;">Lega World</div>' +
+          '<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="9"><div onClick="{{ n.go }}" style="padding:13px 10px;border-bottom:1px solid #EEF4F4;font-size:17px;font-weight:800;color:#281F38;">{{ n.label }}</div></sc-for>' +
+        '</div>' +
+      '</div>' +
+    '</sc-if>';
+  if (template.indexOf(headerAnchor) >= 0) template = template.replace(headerAnchor, MOBILE_MENU + headerAnchor);
   var anchor = '<span onClick="{{ submitReg }}"';
   if (template.indexOf(anchor) >= 0) template = template.replace(anchor, PLAYERS_FIELD + anchor);
 
@@ -79,7 +99,7 @@
       '<div style="max-width:1200px;margin:0 auto;padding:36px 22px 34px;">' +
         '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#90C0E4;">Fixtures & results</div>' +
         '<h2 style="font-size:38px;font-weight:900;margin:8px 0 8px;letter-spacing:-.02em;">Matches archive</h2>' +
-        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Filter every recorded fixture, scoreline, walkover/raw Challenge Place row, and team head-to-head from the Lega archive.</p>' +
+        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Filter every recorded fixture, scoreline, awarded result note, and team head-to-head from the Lega archive.</p>' +
       '</div>' +
     '</section>' +
     '<section style="max-width:1200px;margin:0 auto;padding:24px 22px 72px;">' +
@@ -93,14 +113,14 @@
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Matches shown</div><div style="font-size:30px;font-weight:300;color:#48246C;">{{ matchShown }}</div></div>' +
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Played</div><div style="font-size:30px;font-weight:300;color:#067C7C;">{{ matchPlayed }}</div></div>' +
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Goals</div><div style="font-size:30px;font-weight:300;color:#F0B418;">{{ matchGoals }}</div></div>' +
-        '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Raw / walkover</div><div style="font-size:30px;font-weight:300;color:#C03048;">{{ matchRaw }}</div></div>' +
+        '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Result notes</div><div style="font-size:30px;font-weight:300;color:#C03048;">{{ matchRaw }}</div></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1.35fr .85fr;gap:18px;align-items:start;">' +
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:20px;padding:0 20px 20px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
-          '<div style="display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr;gap:12px;padding:16px 0;font-size:12px;font-weight:900;text-transform:uppercase;color:#5C5470;border-bottom:1px solid #E2ECEE;"><div>Match</div><div>Competition</div><div>Season</div><div style="text-align:right;">Status</div></div>' +
+          '<div style="display:grid;grid-template-columns:1.4fr .9fr .75fr .65fr;gap:12px;padding:16px 0;font-size:12px;font-weight:900;text-transform:uppercase;color:#5C5470;border-bottom:1px solid #E2ECEE;"><div>Match</div><div>Competition</div><div>Season</div><div style="text-align:right;">Status</div></div>' +
           '<sc-for list="{{ matchRows }}" as="m" hint-placeholder-count="10">' +
-            '<div style="display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #EEF4F4;">' +
-              '<div><div style="display:flex;align-items:center;gap:10px;min-width:0;"><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.homeLabel }}</span><span style="font-size:18px;font-weight:900;color:#48246C;font-variant-numeric:tabular-nums;">{{ m.score }}</span><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.awayLabel }}</span></div><div style="font-size:11px;color:#A09AAE;font-weight:700;margin-top:4px;">{{ m.date }}</div><div style="font-size:11px;color:#C03048;font-weight:700;margin-top:4px;">{{ m.rawLine }}</div></div>' +
+            '<div style="display:grid;grid-template-columns:1.4fr .9fr .75fr .65fr;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #EEF4F4;">' +
+              '<div><div style="font-size:11px;color:#A09AAE;font-weight:800;margin-bottom:8px;">{{ m.displayDate }}</div><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;min-width:0;"><span style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;"><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.homeLabel }}</span><dc-import name="TeamBadge" team="{{ m.homeBadge }}" size="30" hint-size="30px,30px"></dc-import></span><span style="font-size:18px;font-weight:900;color:#48246C;font-variant-numeric:tabular-nums;min-width:58px;text-align:center;">{{ m.score }}</span><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ m.awayBadge }}" size="30" hint-size="30px,30px"></dc-import><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.awayLabel }}</span></span></div><div style="font-size:11px;color:#5C5470;font-weight:700;margin-top:7px;">{{ m.time }}</div><div style="font-size:11px;color:#C03048;font-weight:700;margin-top:4px;">{{ m.rawLine }}</div></div>' +
               '<div style="font-size:13px;font-weight:800;color:#48246C;">{{ m.competition }}</div>' +
               '<div style="font-size:13px;font-weight:700;color:#5C5470;">{{ m.season }} · {{ m.gameweek }}</div>' +
               '<div style="text-align:right;"><span style="display:inline-block;border-radius:999px;padding:6px 10px;background:{{ m.statusBg }};color:{{ m.statusColor }};font-size:11px;font-weight:900;text-transform:uppercase;">{{ m.status }}</span></div>' +
@@ -119,6 +139,7 @@
             '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;margin-bottom:12px;">Selected team record</div>' +
             '<div style="font-size:22px;font-weight:900;color:#281F38;">{{ matchRecordTeam }}</div>' +
             '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;text-align:center;"><div><div style="font-size:24px;font-weight:300;color:#48246C;">{{ matchTeamPlayed }}</div><div style="font-size:10px;font-weight:800;color:#5C5470;">P</div></div><div><div style="font-size:24px;font-weight:300;color:#067C7C;">{{ matchTeamWins }}</div><div style="font-size:10px;font-weight:800;color:#5C5470;">W</div></div><div><div style="font-size:24px;font-weight:300;color:#A09AAE;">{{ matchTeamDraws }}</div><div style="font-size:10px;font-weight:800;color:#5C5470;">D</div></div><div><div style="font-size:24px;font-weight:300;color:#C03048;">{{ matchTeamLosses }}</div><div style="font-size:10px;font-weight:800;color:#5C5470;">L</div></div></div>' +
+            '<div style="margin-top:16px;border-top:1px solid #EEF4F4;padding-top:12px;"><div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#5C5470;margin-bottom:8px;">Matches by competition</div><sc-for list="{{ matchCompRecordRows }}" as="r" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:1fr repeat(4,28px);gap:7px;align-items:center;font-size:12px;font-weight:800;color:#281F38;padding:5px 0;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.competition }}</span><span>{{ r.p }}</span><span style="color:#067C7C;">{{ r.w }}</span><span style="color:#A09AAE;">{{ r.d }}</span><span style="color:#C03048;">{{ r.l }}</span></div></sc-for></div>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -132,7 +153,9 @@
   proto.signRegVals = function () {
     var o = origSignRegVals.call(this);
     o.regPlayers = (this.state.regForm && this.state.regForm.players) || "";
+    o.regPlayerPhotos = (this.state.regForm && this.state.regForm.playerPhotos) || "";
     o.onRegPlayers = this.setField("regForm", "players");
+    o.onRegPlayerPhotos = this.setField("regForm", "playerPhotos");
     return o;
   };
 
@@ -278,6 +301,12 @@
     if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0);
     var teams = Object.keys(ex.teams || {});
     return teams.length ? "Challenge roster: " + teams.join(" / ") : "Challenge Place checked";
+  }
+  function playerXgEstimate(player, ex) {
+    var goals = Number((player && player.goals) || 0);
+    var dead = Number((ex && ex.deadBallGoals) || 0);
+    var pens = Number((ex && ex.penaltyGoals) || 0);
+    return Math.max(0, (goals * 0.78) + (dead * 0.07) + (pens * 0.01)).toFixed(1);
   }
   function addRosterName(rosters, team, name) {
     if (!team || !name) return;
@@ -438,7 +467,8 @@
       var hasTeams = o.pBioRows.some(function (row) { return row.label === "Challenge teams"; });
       if (ex && !hasTeams) {
         o.pBioRows = o.pBioRows.concat([
-          { label: "Challenge teams", val: Object.keys(ex.teams || {}).join(" / ") || "Unlisted" }
+          { label: "Challenge teams", val: Object.keys(ex.teams || {}).join(" / ") || "Unlisted" },
+          { label: "xG estimate", val: playerXgEstimate(this.players[this.state.playerSel] || {}, ex) }
         ]);
       }
     }
@@ -476,11 +506,95 @@
     });
   }
   function currentFixtures() {
-    return [
-      { id: "current:2026-27:1", competition: "Lega League", sourceCompetition: "2026/27 fixtures", season: "2026/27", gameweek: "GW1", date: "Sat 5 Sep 16:00", home: "Dynamo FC", away: "Golden Stars", hs: null, as: null, status: "fixture", raw: "" },
-      { id: "current:2026-27:2", competition: "Lega League", sourceCompetition: "2026/27 fixtures", season: "2026/27", gameweek: "GW1", date: "Sat 5 Sep 18:00", home: "MFM", away: "Future Stars", hs: null, as: null, status: "fixture", raw: "" },
-      { id: "current:2026-27:3", competition: "Lega League", sourceCompetition: "2026/27 fixtures", season: "2026/27", gameweek: "GW1", date: "Sun 6 Sep 16:00", home: "Royal FC", away: "Kings FC", hs: null, as: null, status: "fixture", raw: "" }
+    var teams = ["Fc Eagles", "Dynamo FC", "MFM", "Royal FC", "Kings FC", "Future Stars", "Golden Stars"];
+    var rounds = roundRobin(teams);
+    var rows = [];
+    rounds.concat(reverseRounds(rounds)).forEach(function (round, idx) {
+      var gw = idx + 1;
+      var start = addDays(new Date(2026, 8, 5), (gw - 1) * 7 + (gw > 3 ? 14 : 0) + (gw > 6 ? 14 : 0));
+      round.forEach(function (pair, matchIdx) {
+        var slot = matchSlot(start, matchIdx);
+        rows.push({
+          id: "current:2026-27:gw" + gw + ":" + matchIdx,
+          competition: "Lega League",
+          sourceCompetition: "2026/27 fixtures",
+          season: "2026/27",
+          gameweek: "GW" + gw,
+          date: slot.date,
+          time: slot.time,
+          home: pair[0],
+          away: pair[1],
+          hs: null,
+          as: null,
+          status: "fixture",
+          raw: ""
+        });
+      });
+    });
+    return rows.concat(legaCupFixtures());
+  }
+  function roundRobin(sourceTeams) {
+    var teams = sourceTeams.slice();
+    if (teams.length % 2) teams.push("BYE");
+    var rounds = [];
+    var n = teams.length;
+    for (var r = 0; r < n - 1; r++) {
+      var pairs = [];
+      for (var i = 0; i < n / 2; i++) {
+        var a = teams[i], b = teams[n - 1 - i];
+        if (a !== "BYE" && b !== "BYE") pairs.push(r % 2 ? [b, a] : [a, b]);
+      }
+      rounds.push(pairs);
+      teams.splice(1, 0, teams.pop());
+    }
+    return rounds;
+  }
+  function reverseRounds(rounds) {
+    return rounds.map(function (round) { return round.map(function (p) { return [p[1], p[0]]; }); });
+  }
+  function addDays(date, days) {
+    var d = new Date(date.getTime());
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+  function matchSlot(start, idx) {
+    var slots = [
+      { offset: 0, time: "16:00" },
+      { offset: 1, time: "15:00" },
+      { offset: 1, time: "15:00" }
     ];
+    var slot = slots[idx % slots.length];
+    var d = addDays(start, slot.offset);
+    return { date: shortDate(d), time: slot.time };
+  }
+  function shortDate(d) {
+    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()] + " " + d.getDate() + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()];
+  }
+  function legaCupFixtures() {
+    return [
+      ["Cup QF", "Sat 26 Sep", "16:00", "Dynamo FC", "Royal FC"],
+      ["Cup QF", "Sun 27 Sep", "15:00", "Golden Stars", "Kings FC"],
+      ["Cup QF", "Sun 27 Sep", "15:00", "MFM", "Future Stars"],
+      ["Cup SF", "Sat 31 Oct", "16:00", "Winner QF1", "Fly Eagles"],
+      ["Cup SF", "Sun 1 Nov", "15:00", "Winner QF2", "Winner QF3"],
+      ["Cup Final", "Sun 10 Jan", "15:00", "Winner SF1", "Winner SF2"]
+    ].map(function (r, idx) {
+      return {
+        id: "current:lega-cup:2026-27:" + idx,
+        competition: "Lega Cup",
+        sourceCompetition: "2026/27 fixtures",
+        season: "2026/27",
+        gameweek: r[0],
+        date: r[1],
+        time: r[2],
+        home: canonTeam(r[3]),
+        away: canonTeam(r[4]),
+        hs: null,
+        as: null,
+        status: "fixture",
+        raw: ""
+      };
+    });
   }
   function archiveRows(app) {
     var rows = [];
@@ -576,6 +690,33 @@
     });
     return rec;
   }
+  function teamRecordByCompetition(rows, team) {
+    team = canonTeam(team);
+    var out = {};
+    numericRows(rows).forEach(function (m) {
+      var home = canonTeam(m.home), away = canonTeam(m.away);
+      if (home !== team && away !== team) return;
+      var key = m.competition || "Archive";
+      var rec = out[key] || (out[key] = { competition: key, p: 0, w: 0, d: 0, l: 0 });
+      var gf = home === team ? Number(m.hs) : Number(m.as);
+      var ga = home === team ? Number(m.as) : Number(m.hs);
+      rec.p += 1;
+      if (gf > ga) rec.w += 1;
+      else if (gf === ga) rec.d += 1;
+      else rec.l += 1;
+    });
+    return Object.keys(out).sort().map(function (k) { return out[k]; });
+  }
+  function displayDateAndTime(m) {
+    var date = String(m.date || m.sourceCompetition || "");
+    var time = String(m.time || "");
+    var parts = date.match(/^(.*?)(\d{1,2}:\d{2})(?:\s*(AM|PM))?(.*)$/i);
+    if (!time && parts) {
+      date = (parts[1] + (parts[4] || "")).replace(/\s+/g, " ").trim();
+      time = parts[2] + (parts[3] ? " " + parts[3].toUpperCase() : "");
+    }
+    return { date: date || "Date TBC", time: time || "" };
+  }
   proto.matchesVals = function () {
     var self = this;
     var all = this.allMatchRows();
@@ -610,6 +751,7 @@
     var hh = h2hFromRows(all, matchA, matchB);
     var recTeam = team || matchA || defaultA;
     var rec = teamRecord(all, recTeam);
+    var compRecords = teamRecordByCompetition(all, recTeam);
     return {
       matchComp: comp,
       matchSeason: season,
@@ -627,14 +769,18 @@
       matchRaw: String(rawCount),
       matchRows: filtered.slice(0, 140).map(function (m) {
         var isPlayed = m.hs != null && m.as != null && m.home && m.away;
-        var status = isPlayed ? "Played" : (m.status === "fixture" ? "Fixture" : "Raw");
+        var status = isPlayed ? "Played" : (m.status === "fixture" ? "Fixture" : "Recorded");
         var rawOnly = !m.home || !m.away;
+        var dt = displayDateAndTime(m);
         return {
-          homeLabel: rawOnly ? "Raw Challenge row" : teamLabel(m.home),
+          homeLabel: rawOnly ? "Recorded result note" : teamLabel(m.home),
           awayLabel: rawOnly ? "" : teamLabel(m.away),
+          homeBadge: rawOnly ? "Lega World" : teamLabel(m.home),
+          awayBadge: rawOnly ? "Lega World" : teamLabel(m.away),
           score: isPlayed ? (m.hs + "-" + m.as) : (rawOnly ? "" : "vs"),
-          date: m.date || m.sourceCompetition || "",
-          rawLine: rawOnly || /raw|walkover/i.test(m.status || "") ? (m.raw || "") : "",
+          displayDate: dt.date,
+          time: dt.time,
+          rawLine: rawOnly || /raw|walkover/i.test(m.status || "") ? String(m.raw || "").replace(/walkover/ig, "awarded result") : "",
           competition: m.competition || "Archive",
           season: m.season || "Archive",
           gameweek: m.gameweek || "Archive",
@@ -663,6 +809,7 @@
       matchTeamWins: String(rec.w),
       matchTeamDraws: String(rec.d),
       matchTeamLosses: String(rec.l),
+      matchCompRecordRows: compRecords,
       darkSelectStyle: "width:100%;font-size:14px;font-weight:800;padding:12px 14px;border:1px solid rgba(255,255,255,.28);border-radius:12px;background:#310039;color:#fff;"
     };
   };
@@ -674,6 +821,16 @@
     }
     return origTeamH2H.call(this, a, b);
   };
+  var origStatsVals = proto.statsVals;
+  proto.statsVals = function () {
+    var o = origStatsVals.call(this);
+    if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
+      o.sRecCards = o.sRecCards.concat([
+        { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
+      ]);
+    }
+    return o;
+  };
   var origRenderVals = proto.renderVals;
   proto.renderVals = function () {
     var o = origRenderVals.call(this);
@@ -683,12 +840,20 @@
       var on = v === n[0] || (n[0] === "competitions" && v === "competition");
       return {
         label: n[1],
-        go: function () { this.go(n[0]); }.bind(this),
+        go: function () { this.setState({ mobileMenuOpen: false }); this.go(n[0]); }.bind(this),
         style: "cursor:pointer;padding:8px 12px;border-radius:999px;font-weight:" + (on ? 700 : 600) + ";font-size:13px;white-space:nowrap;color:" + (on ? "#fff" : "#5C5470") + ";background:" + (on ? "#48246C" : "transparent") + ";transition:background .2s;"
       };
     }, this);
     o.isMatches = v === "matches";
     o.goMatches = function () { this.go("matches"); }.bind(this);
+    o.mobileMenuOpen = !!this.state.mobileMenuOpen;
+    o.toggleMobileMenu = function () { this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }); }.bind(this);
+    o.closeMobileMenu = function () { this.setState({ mobileMenuOpen: false }); }.bind(this);
+    o.heroFixtures = currentFixtures().filter(function (m) {
+      return m.competition === "Lega League" && m.season === "2026/27" && m.gameweek === "GW1";
+    }).map(function (m) {
+      return { home: teamLabel(m.home), away: teamLabel(m.away), date: m.date, time: m.time };
+    });
     return Object.assign(o, this.matchesVals());
   };
 
@@ -699,17 +864,20 @@
     var f = this.state.regForm, self = this;
     if (!f.team || !f.email) { this.setState({ flash: "Add your team name and a contact email." }); return; }
     var players = String(f.players || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var playerPhotos = String(f.playerPhotos || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     function reset(msg) {
-      self.setState({ regForm: { team: "", manager: "", state: "Lagos", email: "", squad: "", colours: "", comp: "Lega League", players: "" }, flash: msg });
+      self.setState({ regForm: { team: "", manager: "", state: "Lagos", email: "", squad: "", colours: "", comp: "Lega League", players: "", playerPhotos: "" }, flash: msg });
     }
     if (configured()) {
+      var squadNotes = f.squad || "";
+      if (playerPhotos.length) squadNotes += (squadNotes ? "\n\n" : "") + "Player profile/photo links:\n" + playerPhotos.join("\n");
       window.LEGA_db.insert("registrations", {
         team: f.team, manager: f.manager, state: f.state, email: f.email,
-        colours: f.colours, comp: f.comp, squad: f.squad, players: players
+        colours: f.colours, comp: f.comp, squad: squadNotes, players: players
       }).then(function () { reset("Registration received — the Lega World team will review your squad."); })
         .catch(function (e) { self.setState({ flash: "Could not submit right now: " + e.message }); });
     } else {
-      var rec = Object.assign({ status: "Pending review" }, f); var pr = [rec].concat(self.state.pendR);
+      var rec = Object.assign({ status: "Pending review", player_photos: playerPhotos }, f); var pr = [rec].concat(self.state.pendR);
       self.save("pendR", pr); self.setState({ pendR: pr }); reset("Registration received. The Lega World team will be in touch.");
     }
   };

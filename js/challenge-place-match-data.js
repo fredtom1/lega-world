@@ -1,7 +1,7 @@
 /* Generated from Challenge Place match extraction. */
 (function(){
   window.LEGA_CHALLENGE_MATCH_DATA = {
-  "extractedAt": "2026-06-25T00:17:11.573Z",
+  "extractedAt": "2026-06-25T00:57:47.931Z",
   "competitions": [
     "Gray Cup",
     "Lega Cup",
@@ -23,18 +23,14 @@
     "Barnet F.C",
     "Barnet FC",
     "Dynamo FC",
-    "FUT",
     "Fc Eagles",
-    "Fc Eagles FC No players",
     "Future Stars",
-    "GST",
     "Golden Stars",
     "Leo fc",
     "MFM",
     "Nova fc",
     "OBC",
     "Philadelphia Fc",
-    "STAR",
     "Spectrum",
     "Starlight",
     "TEA3",
@@ -6158,7 +6154,7 @@
       "raw": "Sun 1/28/2024 • 3:00 PM GMT+1 6 MFM 2 FUT",
       "date": "Sun 1/28/2024 • 3:00 PM GMT+1",
       "home": "MFM",
-      "away": "FUT",
+      "away": "Future Stars",
       "hs": 6,
       "as": 2,
       "status": "played"
@@ -6172,8 +6168,8 @@
       "href": "/c/65ade7f97dabe7a4a06c2ee5/match/65ade8a20d018f95aa749f85",
       "raw": "Fri 1/26/2024 • 3:00 PM GMT+1 7 GST 3 STAR",
       "date": "Fri 1/26/2024 • 3:00 PM GMT+1",
-      "home": "GST",
-      "away": "STAR",
+      "home": "Golden Stars",
+      "away": "Starlight",
       "hs": 7,
       "as": 3,
       "status": "played"
@@ -6187,8 +6183,8 @@
       "href": "/c/65ade7f97dabe7a4a06c2ee5/match/65ade8a20d018f95aa749f87",
       "raw": "Fri 2/9/2024 • 4:00 PM GMT+1 FUT STAR",
       "date": "Fri 2/9/2024 • 4:00 PM GMT+1",
-      "home": "FUT",
-      "away": "STAR",
+      "home": "Future Stars",
+      "away": "Starlight",
       "hs": null,
       "as": null,
       "status": "fixture"
@@ -6203,7 +6199,7 @@
       "raw": "Sat 2/10/2024 • 4:00 PM GMT+1 MFM GST",
       "date": "Sat 2/10/2024 • 4:00 PM GMT+1",
       "home": "MFM",
-      "away": "GST",
+      "away": "Golden Stars",
       "hs": null,
       "as": null,
       "status": "fixture"
@@ -6217,8 +6213,8 @@
       "href": "/c/65ade7f97dabe7a4a06c2ee5/match/65ade8a20d018f95aa749f8a",
       "raw": "Sat 2/17/2024 • 3:00 PM GMT+1 GST FUT",
       "date": "Sat 2/17/2024 • 3:00 PM GMT+1",
-      "home": "GST",
-      "away": "FUT",
+      "home": "Golden Stars",
+      "away": "Future Stars",
       "hs": null,
       "as": null,
       "status": "fixture"
@@ -11633,7 +11629,7 @@
       "raw": "No date WNT FC",
       "date": "No date",
       "home": "WINNERS Team",
-      "away": "Fc Eagles FC No players",
+      "away": "Fc Eagles",
       "hs": null,
       "as": null,
       "status": "fixture"

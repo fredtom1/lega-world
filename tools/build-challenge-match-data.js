@@ -9,7 +9,23 @@ function uniq(arr) {
 }
 
 function acronymMap(comp) {
-  const map = {};
+  const map = {
+    GST: "Golden Stars",
+    GSF: "Golden Stars",
+    FUT: "Future Stars",
+    DYN: "Dynamo FC",
+    MFM: "MFM",
+    FC: "Fc Eagles",
+    NOV: "Nova fc",
+    NOVF: "Nova fc",
+    WNT: "WINNERS Team",
+    PHIF: "Philadelphia Fc",
+    ALL: "All Stars",
+    BAR: "Barnet FC",
+    GROS: "Growing stars",
+    STAR: "Starlight",
+    OBC: "OBC"
+  };
   (comp.competitors || []).forEach((team) => {
     if (team.acronym) map[String(team.acronym).toUpperCase()] = team.name;
     const name = String(team.name || "");
@@ -19,7 +35,7 @@ function acronymMap(comp) {
     if (/Future/i.test(name)) map.FUT = name;
     if (/MFM/i.test(name)) map.MFM = name;
     if (/WINNERS/i.test(name)) map.WNT = name;
-    if (/Nova/i.test(name)) map.NOVF = name;
+    if (/Nova/i.test(name)) { map.NOV = name; map.NOVF = name; }
     if (/Philadelphia/i.test(name)) map.PHIF = name;
     if (/All Stars/i.test(name)) map.ALL = name;
     if (/Barnet/i.test(name)) map.BAR = name;
@@ -31,7 +47,11 @@ function acronymMap(comp) {
 }
 
 function teamName(code, map) {
-  return map[String(code || "").toUpperCase()] || code;
+  const rawName = map[String(code || "").toUpperCase()] || code;
+  return String(rawName || "")
+    .replace(/\s+FC\s+No players$/i, "")
+    .replace(/\s+No players$/i, "")
+    .trim();
 }
 
 function seasonFromName(name) {
