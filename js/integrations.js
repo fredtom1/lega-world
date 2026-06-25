@@ -255,9 +255,9 @@
     if (name === "Origi") {
       return {
         teams: { "WINNERS Team": 1, "Golden Stars": 1 },
-        deadBallGoals: 2,
+        deadBallGoals: 6,
         records: [
-          { competition: "Lega League 2020 (corona)", team: "WINNERS Team", kind: "deadBallGoals", val: 2, note: "Most free kicks in one season" }
+          { competition: "Lega League 2020 (corona)", team: "WINNERS Team", kind: "deadBallGoals", val: 6, note: "Six free-kicks in the season, including two back-to-back free-kick goals in the first three matches" }
         ]
       };
     }
@@ -268,7 +268,7 @@
     app.freeKickData.MFM = app.freeKickData.MFM || {};
     app.freeKickData.MFM.Ayo = Math.max(app.freeKickData.MFM.Ayo || 0, 3);
     app.freeKickData["WINNERS Team"] = app.freeKickData["WINNERS Team"] || {};
-    app.freeKickData["WINNERS Team"].Origi = Math.max(app.freeKickData["WINNERS Team"].Origi || 0, 2);
+    app.freeKickData["WINNERS Team"].Origi = Math.max(app.freeKickData["WINNERS Team"].Origi || 0, 6);
   }
   function playerStatExtra(name) {
     name = canonPlayer(name);
@@ -808,7 +808,7 @@
       return { big: String(r.goals), label: r.name + " goals for " + r.team, sub: "Player-team scoring record from the archive" };
     });
     cards.push({ big: "3", label: "Ayo goalkeeper free-kicks for MFM", sub: "Goalkeeper scoring record" });
-    cards.push({ big: "2", label: "Origi free-kicks in the 2020 Corona season", sub: "Most free-kicks recorded in one season" });
+    cards.push({ big: "6", label: "Origi free-kicks in the 2020 Corona season", sub: "Two back-to-back free-kick goals in the first three matches" });
     return cards;
   }
   function teamRecord(rows, team) {
