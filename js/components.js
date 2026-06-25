@@ -30,7 +30,7 @@
       const MONO = {
         "winners team": ["WT", "#C03048"], "barnet fc": ["BA", "#9B2335"],
         "fc eagles": ["FE", "#2E7CB0"], "nova fc": ["NV", "#0E7A6E"],
-        "spectrum": ["SP", "#7C5AA0"], "obc": ["OBC", "#000C3C"],
+        "spectrum": ["SP", "#7C5AA0"], "obc": ["OBC", "#000C3C"], "obc fc": ["OBC", "#000C3C"],
         "philadelphia fc": ["PH", "#1E5E8C"], "all stars": ["AS", "#B5791F"],
         "starlight": ["SL", "#54306C"], "the royals fc": ["TR", "#6B2D5C"],
         "leo fc": ["LE", "#8C5A1F"], "western boys": ["WB", "#1FA05A"],

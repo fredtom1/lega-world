@@ -48,10 +48,12 @@ function acronymMap(comp) {
 
 function teamName(code, map) {
   const rawName = map[String(code || "").toUpperCase()] || code;
-  return String(rawName || "")
+  const cleaned = String(rawName || "")
     .replace(/\s+FC\s+No players$/i, "")
     .replace(/\s+No players$/i, "")
     .trim();
+  if (/^OBC(?:\s+FC)?$/i.test(cleaned)) return "OBC";
+  return cleaned;
 }
 
 function seasonFromName(name) {

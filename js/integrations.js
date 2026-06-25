@@ -57,7 +57,7 @@
       '<div style="height:12px;background:linear-gradient(90deg,#48246C,#009C9C,#2BD6D6);"></div>' +
       '<div style="padding:22px 24px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
         '<div style="flex:1;min-width:250px;position:relative;"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;color:#A09AAE;">⌕</span><input value="{{ playerSearch }}" onInput="{{ onPlayerSearch }}" placeholder="Search players" style="width:100%;font-size:16px;font-weight:600;padding:15px 16px 15px 48px;border:1px solid rgba(255,255,255,.36);border-radius:14px;background:#2C0630;color:#fff;" /></div>' +
-        '<select value="{{ playerClubFilter }}" onChange="{{ onPlayerClubFilter }}" style="min-width:190px;font-size:15px;font-weight:700;padding:14px 16px;border:1px solid rgba(255,255,255,.36);border-radius:14px;background:#2C0630;color:#fff;"><option value="">All clubs</option><sc-for list="{{ playerClubOptions }}" as="club" hint-placeholder-count="6"><option value="{{ club }}">{{ club }}</option></sc-for></select>' +
+        '<select value="{{ playerClubFilter }}" onChange="{{ onPlayerClubFilter }}" style="min-width:190px;font-size:15px;font-weight:700;padding:14px 16px;border:1px solid rgba(255,255,255,.36);border-radius:14px;background:#2C0630;color:#fff;"><option value="">All clubs</option><sc-for list="{{ playerClubOptions }}" as="club" hint-placeholder-count="6"><option value="{{ club.value }}">{{ club.label }}</option></sc-for></select>' +
         '<div style="font-size:13px;font-weight:700;color:#D7ECF7;">{{ playerShowingCount }} players shown</div>' +
       '</div>' +
       '<div style="padding:0 24px 24px;overflow-x:auto;">' +
@@ -68,7 +68,7 @@
           '<sc-for list="{{ playerDirectory }}" as="row" hint-placeholder-count="8">' +
             '<div onClick="{{ row.pick }}" role="button" tabindex="0" style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr .7fr .7fr .7fr;gap:18px;align-items:center;padding:16px 0;border-top:1px solid rgba(255,255,255,.13);cursor:pointer;">' +
               '<div style="display:flex;align-items:center;gap:14px;min-width:0;"><span style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#F0B418,#009C9C);display:flex;align-items:center;justify-content:center;flex:none;font-weight:900;color:#fff;font-size:18px;">{{ row.initial }}</span><div style="min-width:0;"><div style="font-size:17px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div><div style="font-size:12px;color:#D7ECF7;font-weight:600;margin-top:3px;">{{ row.extraLine }}</div></div></div>' +
-              '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><dc-import name="TeamBadge" team="{{ row.team }}" size="30" hint-size="30px,30px"></dc-import><span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.team }}</span></div>' +
+              '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><dc-import name="TeamBadge" team="{{ row.teamLabel }}" size="30" hint-size="30px,30px"></dc-import><span style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.teamLabel }}</span></div>' +
               '<div style="font-size:14px;font-weight:700;color:#fff;">{{ row.position }}</div>' +
               '<div style="text-align:center;font-size:15px;font-weight:800;color:#F0B418;">{{ row.goals }}</div>' +
               '<div style="text-align:center;font-size:15px;font-weight:800;color:#90C0E4;">{{ row.assists }}</div>' +
@@ -163,21 +163,22 @@
   proto.playersVals = function () {
     var o = origPlayersVals.call(this);
     var search = String(this.state.playerSearch || "").trim().toLowerCase();
-    var club = this.state.playerClubFilter || "";
-    var clubs = Object.keys(this.rosters || {}).filter(function (t) { return ((this.rosters[t] || []).length > 0); }, this).sort();
+    var club = canonTeam(this.state.playerClubFilter || "");
+    var clubs = uniqueOptions(Object.keys(this.rosters || {}).filter(function (t) { return ((this.rosters[t] || []).length > 0); }, this).map(canonTeam));
     var self = this;
     var rows = (this.playerNames || []).map(function (n) {
       var p = self.players[n] || {};
-      var team = p.mainTeam || (self.playerClubs && self.playerClubs(n)[0]) || "Unlisted";
+      var team = canonTeam(p.mainTeam || (self.playerClubs && self.playerClubs(n)[0]) || "Unlisted");
       var ex = playerExtra(n);
       var aliases = ex && ex.aliases ? " " + ex.aliases.join(" ") : "";
       return {
         name: n,
         team: team,
+        teamLabel: teamLabel(team),
         position: self.positions[n] || "Unlisted",
         goals: p.goals || 0,
         assists: p.assists || 0,
-        searchText: n + " " + team + " " + (self.positions[n] || "Unlisted") + aliases,
+        searchText: n + " " + team + " " + teamLabel(team) + " " + (self.positions[n] || "Unlisted") + aliases,
         initial: (n[0] || "?").toUpperCase(),
         pick: function () { self.setState({ playerSel: n }); }
       };
@@ -215,7 +216,9 @@
     return PLAYER_ALIASES[n] || PLAYER_ALIASES[n.toUpperCase()] || n;
   }
   function teamLabel(team) {
-    return team === "Fc Eagles" ? "Fly Eagles" : team;
+    if (team === "Fc Eagles") return "Fly Eagles";
+    if (canonTeam(team) === "OBC") return "OBC FC";
+    return team;
   }
   function manualPlayerExtra(name) {
     name = canonPlayer(name);
@@ -300,7 +303,7 @@
     var total = (ex.ownGoals || 0) + (ex.yellowCards || 0) + (ex.redCards || 0) + (ex.deadBallGoals || 0);
     if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0);
     var teams = Object.keys(ex.teams || {});
-    return teams.length ? "Challenge roster: " + teams.join(" / ") : "Challenge Place checked";
+    return teams.length ? "Challenge roster: " + teams.map(teamLabel).join(" / ") : "Challenge Place checked";
   }
   function playerXgEstimate(player, ex) {
     var goals = Number((player && player.goals) || 0);
@@ -458,8 +461,15 @@
     var o = origPlayersValsChallengeFix.call(this);
     if (o.playerDirectory) {
       o.playerDirectory = o.playerDirectory.map(function (row) {
+        row.team = canonTeam(row.team);
+        row.teamLabel = teamLabel(row.team);
         row.extraLine = extraLine(playerExtra(row.name));
         return row;
+      });
+    }
+    if (o.pClubs) {
+      o.pClubs = o.pClubs.map(function (row) {
+        return Object.assign({}, row, { name: teamLabel(row.name) });
       });
     }
     if (this.state.playerSel && o.pBioRows) {
@@ -467,7 +477,7 @@
       var hasTeams = o.pBioRows.some(function (row) { return row.label === "Challenge teams"; });
       if (ex && !hasTeams) {
         o.pBioRows = o.pBioRows.concat([
-          { label: "Challenge teams", val: Object.keys(ex.teams || {}).join(" / ") || "Unlisted" },
+          { label: "Challenge teams", val: Object.keys(ex.teams || {}).map(teamLabel).join(" / ") || "Unlisted" },
           { label: "xG estimate", val: playerXgEstimate(this.players[this.state.playerSel] || {}, ex) }
         ]);
       }
@@ -485,6 +495,7 @@
   function canonTeam(team) {
     var t = String(team || "").trim();
     if (t === "Fly Eagles") return "Fc Eagles";
+    if (/^OBC(?:\s+FC)?$/i.test(t) || /^Obc(?:\s+FC)?$/i.test(t)) return "OBC";
     return t;
   }
   function seasonSort(a, b) {
@@ -824,6 +835,17 @@
   var origStatsVals = proto.statsVals;
   proto.statsVals = function () {
     var o = origStatsVals.call(this);
+    if (o.h2hTeamList) {
+      o.h2hTeamList = o.h2hTeamList.map(function (team) { return teamLabel(team); }).filter(function (team, idx, arr) {
+        return arr.indexOf(team) === idx;
+      }).sort();
+    }
+    o.h2hA = teamLabel(o.h2hA);
+    o.h2hB = teamLabel(o.h2hB);
+    o.h2hAValue = teamLabel(o.h2hAValue);
+    o.h2hBValue = teamLabel(o.h2hBValue);
+    o.onH2hA = function (e) { this.setState({ h2hA: canonTeam(e.target.value) }); }.bind(this);
+    o.onH2hB = function (e) { this.setState({ h2hB: canonTeam(e.target.value) }); }.bind(this);
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
         { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
