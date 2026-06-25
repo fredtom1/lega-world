@@ -93,6 +93,23 @@
   var PORTAL_LINK = '<a href="login.html" style="color:#fff;font-size:12px;font-weight:700;text-decoration:none;background:#009C9C;padding:7px 14px;border-radius:999px;">Portal login</a>';
   if (template.indexOf(FOOT) >= 0) template = template.replace(FOOT, '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;">' + PORTAL_LINK + FOOT + '</div>');
 
+  var H2H_DETAILS =
+    '<div style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;align-items:start;">' +
+      '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
+        '<div style="padding:20px 22px;background:#2C1545;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#F0B418;">Team-vs-team archive</div><div style="font-size:20px;font-weight:900;margin-top:4px;">{{ h2hA }} vs {{ h2hB }}</div></div><div style="font-size:12px;font-weight:800;color:#D7ECF7;">{{ h2hCompetitionCount }} competitions</div></div>' +
+        '<div style="padding:18px 22px;"><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#5C5470;margin-bottom:10px;">Competition breakdown</div><sc-for list="{{ h2hCompetitionRows }}" as="r" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:1fr repeat(6,42px);gap:8px;align-items:center;border-top:1px solid #EEF4F4;padding:10px 0;font-size:12px;font-weight:800;color:#281F38;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.competition }}</span><span title="Played">{{ r.p }}</span><span style="color:#067C7C;" title="Wins">{{ r.w }}</span><span style="color:#A09AAE;" title="Draws">{{ r.d }}</span><span style="color:#C03048;" title="Losses">{{ r.l }}</span><span style="color:#48246C;" title="Goals for">{{ r.gf }}</span><span style="color:#5C5470;" title="Goals against">{{ r.ga }}</span></div></sc-for><sc-if value="{{ h2hNoCompetitionRows }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;text-align:center;color:#5C5470;font-weight:700;background:#FAFCFC;border-radius:16px;">No competition breakdown yet for this pair.</div></sc-if></div>' +
+      '</div>' +
+      '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);padding:20px 22px;">' +
+        '<div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;margin-bottom:12px;">Recent scorelines</div><sc-for list="{{ h2hMatchRows }}" as="m" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;border-top:1px solid #EEF4F4;padding:12px 0;"><span style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;"><span style="font-size:12px;font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.home }}</span><dc-import name="TeamBadge" team="{{ m.home }}" size="26" hint-size="26px,26px"></dc-import></span><span style="font-size:16px;font-weight:900;color:#48246C;font-variant-numeric:tabular-nums;">{{ m.score }}</span><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ m.away }}" size="26" hint-size="26px,26px"></dc-import><span style="font-size:12px;font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.away }}</span></span><div style="grid-column:1/-1;text-align:center;font-size:10px;font-weight:800;color:#5C5470;">{{ m.competition }} · {{ m.season }}</div></div></sc-for><sc-if value="{{ h2hNoMatchRows }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;text-align:center;color:#5C5470;font-weight:700;background:#FAFCFC;border-radius:16px;">No scorelines recorded yet for this pair.</div></sc-if>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:18px;background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
+      '<div style="padding:20px 22px;background:#FAFCFC;border-bottom:1px solid #E2ECEE;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;">{{ h2hA }} against every team</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:4px;">Played, wins, draws, losses, goals and competitions from the archive.</div></div><div style="font-size:24px;font-weight:300;color:#48246C;">{{ h2hAllOpponents }}</div></div>' +
+      '<div style="overflow-x:auto;padding:0 22px 18px;"><div style="min-width:760px;"><div style="display:grid;grid-template-columns:1.4fr repeat(6,52px) 1.2fr;gap:8px;padding:14px 0;font-size:11px;font-weight:900;text-transform:uppercase;color:#5C5470;"><span>Opponent</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GF</span><span>GA</span><span>Competitions</span></div><sc-for list="{{ h2hOpponentRows }}" as="r" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:1.4fr repeat(6,52px) 1.2fr;gap:8px;align-items:center;border-top:1px solid #EEF4F4;padding:12px 0;font-size:12px;font-weight:800;color:#281F38;"><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ r.opponent }}" size="28" hint-size="28px,28px"></dc-import><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.opponent }}</span></span><span>{{ r.p }}</span><span style="color:#067C7C;">{{ r.w }}</span><span style="color:#A09AAE;">{{ r.d }}</span><span style="color:#C03048;">{{ r.l }}</span><span style="color:#48246C;">{{ r.gf }}</span><span style="color:#5C5470;">{{ r.ga }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#5C5470;">{{ r.competitions }}</span></div></sc-for></div></div>' +
+    '</div>';
+  var h2hAnchor = '<sc-if value="{{ h2hNoMeetings }}" hint-placeholder-val="{{ false }}">';
+  if (template.indexOf(h2hAnchor) >= 0) template = template.replace(h2hAnchor, H2H_DETAILS + h2hAnchor);
+
   var MATCHES_PAGE =
     '<sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">' +
     '<section style="background:#2C1545;color:#fff;">' +
@@ -130,10 +147,10 @@
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:16px;">' +
           '<div style="background:#2C1545;color:#fff;border-radius:20px;padding:20px;">' +
-            '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#F0B418;margin-bottom:14px;">Head-to-head quick pick</div>' +
-            '<div style="display:grid;gap:10px;"><select value="{{ matchA }}" onChange="{{ onMatchA }}" style="{{ darkSelectStyle }}"><sc-for list="{{ matchTeamOptions }}" as="o" hint-placeholder-count="8"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select><select value="{{ matchB }}" onChange="{{ onMatchB }}" style="{{ darkSelectStyle }}"><sc-for list="{{ matchTeamOptions }}" as="o" hint-placeholder-count="8"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></div>' +
-            '<div style="margin-top:16px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center;"><div><div style="font-size:32px;font-weight:300;">{{ matchAWins }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">{{ matchALabel }} wins</div></div><div><div style="font-size:22px;font-weight:300;color:#CFC0E0;">{{ matchDraws }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">Draws</div></div><div><div style="font-size:32px;font-weight:300;">{{ matchBWins }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">{{ matchBLabel }} wins</div></div></div>' +
-            '<div style="margin-top:12px;font-size:12px;color:#D7ECF7;font-weight:700;text-align:center;">{{ matchH2HPlayed }} meetings · {{ matchAGoals }}-{{ matchBGoals }} goals</div>' +
+            '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#F0B418;margin-bottom:10px;">Head-to-head moved</div>' +
+            '<div style="font-size:20px;font-weight:900;line-height:1.2;">Use the Statistics head-to-head room for full club records.</div>' +
+            '<div style="margin-top:10px;font-size:13px;color:#D7ECF7;font-weight:700;line-height:1.5;">It now includes opponent-by-opponent records, competitions played, and scorelines from the deeper Challenge Place archive.</div>' +
+            '<span onClick="{{ goStatsH2H }}" style="display:block;text-align:center;margin-top:16px;cursor:pointer;background:#F0B418;color:#2C1545;border-radius:999px;padding:12px 14px;font-size:13px;font-weight:900;">Open head-to-head stats</span>' +
           '</div>' +
           '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:20px;padding:20px;">' +
             '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;margin-bottom:12px;">Selected team record</div>' +
@@ -216,8 +233,10 @@
     return PLAYER_ALIASES[n] || PLAYER_ALIASES[n.toUpperCase()] || n;
   }
   function teamLabel(team) {
-    if (team === "Fc Eagles") return "Fly Eagles";
-    if (canonTeam(team) === "OBC") return "OBC FC";
+    var c = canonTeam(team);
+    if (c === "Fc Eagles") return "Fly Eagles";
+    if (c === "OBC") return "OBC FC";
+    if (c !== String(team || "").trim()) return c;
     return team;
   }
   function manualPlayerExtra(name) {
@@ -494,8 +513,20 @@
 
   function canonTeam(team) {
     var t = String(team || "").trim();
+    t = t.replace(/\s+FC\s+No players$/i, "").replace(/\s+No players$/i, "").trim();
+    var base = t.replace(/\d+$/, "");
     if (t === "Fly Eagles") return "Fc Eagles";
     if (/^OBC(?:\s+FC)?$/i.test(t) || /^Obc(?:\s+FC)?$/i.test(t)) return "OBC";
+    if (/^Barnet\s+F\.?C$/i.test(t)) return "Barnet FC";
+    if (/^TEA\d+$/i.test(t) || /^Team of the year\s+TEA\d+$/i.test(t)) return "Team of the year";
+    if (/^DYN$/i.test(base)) return "Dynamo FC";
+    if (/^(GST|GSF)$/i.test(base)) return "Golden Stars";
+    if (/^FUT$/i.test(base)) return "Future Stars";
+    if (/^BAR$/i.test(base)) return "Barnet FC";
+    if (/^WNT$/i.test(base)) return "WINNERS Team";
+    if (/^(NOV|NOVF)$/i.test(base)) return "Nova fc";
+    if (/^PHIF$/i.test(base)) return "Philadelphia Fc";
+    if (/^GROS$/i.test(base)) return "Growing stars";
     return t;
   }
   function seasonSort(a, b) {
@@ -686,6 +717,77 @@
     });
     return out;
   }
+  function pairRows(rows, a, b) {
+    a = canonTeam(a); b = canonTeam(b);
+    return numericRows(rows).filter(function (m) {
+      var home = canonTeam(m.home), away = canonTeam(m.away);
+      return (home === a && away === b) || (home === b && away === a);
+    });
+  }
+  function addRecord(rec, gf, ga, competition) {
+    rec.p += 1;
+    rec.gf += gf;
+    rec.ga += ga;
+    if (gf > ga) rec.w += 1;
+    else if (gf === ga) rec.d += 1;
+    else rec.l += 1;
+    if (competition) rec.comps[competition] = 1;
+  }
+  function h2hCompetitionRows(rows, a, b) {
+    a = canonTeam(a);
+    var out = {};
+    pairRows(rows, a, b).forEach(function (m) {
+      var key = m.competition || "Archive";
+      var rec = out[key] || (out[key] = { competition: key, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, comps: {} });
+      var home = canonTeam(m.home);
+      var gf = home === a ? Number(m.hs) : Number(m.as);
+      var ga = home === a ? Number(m.as) : Number(m.hs);
+      addRecord(rec, gf, ga, key);
+    });
+    return Object.keys(out).sort().map(function (key) {
+      var rec = out[key];
+      return { competition: rec.competition, p: rec.p, w: rec.w, d: rec.d, l: rec.l, gf: rec.gf, ga: rec.ga };
+    });
+  }
+  function h2hMatchRows(rows, a, b) {
+    return pairRows(rows, a, b).slice(0, 12).map(function (m) {
+      return {
+        home: teamLabel(m.home),
+        away: teamLabel(m.away),
+        score: m.hs + "-" + m.as,
+        competition: m.competition || "Archive",
+        season: m.season || "Archive"
+      };
+    });
+  }
+  function opponentRows(rows, team) {
+    team = canonTeam(team);
+    var out = {};
+    numericRows(rows).forEach(function (m) {
+      var home = canonTeam(m.home), away = canonTeam(m.away);
+      if (home !== team && away !== team) return;
+      var opponent = home === team ? away : home;
+      var rec = out[opponent] || (out[opponent] = { opponent: opponent, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, comps: {} });
+      var gf = home === team ? Number(m.hs) : Number(m.as);
+      var ga = home === team ? Number(m.as) : Number(m.hs);
+      addRecord(rec, gf, ga, m.competition || "Archive");
+    });
+    return Object.keys(out).map(function (opponent) {
+      var rec = out[opponent];
+      return {
+        opponent: teamLabel(opponent),
+        p: rec.p,
+        w: rec.w,
+        d: rec.d,
+        l: rec.l,
+        gf: rec.gf,
+        ga: rec.ga,
+        competitions: Object.keys(rec.comps).sort().join(" / ")
+      };
+    }).sort(function (a, b) {
+      return b.p - a.p || b.w - a.w || a.opponent.localeCompare(b.opponent);
+    });
+  }
   function teamRecord(rows, team) {
     team = canonTeam(team);
     var rec = { p: 0, w: 0, d: 0, l: 0 };
@@ -835,8 +937,16 @@
   var origStatsVals = proto.statsVals;
   proto.statsVals = function () {
     var o = origStatsVals.call(this);
+    var all = this.allMatchRows ? this.allMatchRows() : [];
+    var teamsFromMatches = [];
+    all.forEach(function (m) {
+      if (m.home) teamsFromMatches.push(canonTeam(m.home));
+      if (m.away) teamsFromMatches.push(canonTeam(m.away));
+    });
+    var h2hA = canonTeam(this.state.h2hA || o.h2hAValue || o.h2hA || "Golden Stars");
+    var h2hB = canonTeam(this.state.h2hB || o.h2hBValue || o.h2hB || "Dynamo FC");
     if (o.h2hTeamList) {
-      o.h2hTeamList = o.h2hTeamList.map(function (team) { return teamLabel(team); }).filter(function (team, idx, arr) {
+      o.h2hTeamList = o.h2hTeamList.concat(teamsFromMatches).map(function (team) { return teamLabel(team); }).filter(function (team, idx, arr) {
         return arr.indexOf(team) === idx;
       }).sort();
     }
@@ -846,6 +956,16 @@
     o.h2hBValue = teamLabel(o.h2hBValue);
     o.onH2hA = function (e) { this.setState({ h2hA: canonTeam(e.target.value) }); }.bind(this);
     o.onH2hB = function (e) { this.setState({ h2hB: canonTeam(e.target.value) }); }.bind(this);
+    var compRows = h2hCompetitionRows(all, h2hA, h2hB);
+    var matchRows = h2hMatchRows(all, h2hA, h2hB);
+    var oppRows = opponentRows(all, h2hA);
+    o.h2hCompetitionRows = compRows;
+    o.h2hNoCompetitionRows = compRows.length === 0;
+    o.h2hCompetitionCount = String(compRows.length);
+    o.h2hMatchRows = matchRows;
+    o.h2hNoMatchRows = matchRows.length === 0;
+    o.h2hOpponentRows = oppRows;
+    o.h2hAllOpponents = String(oppRows.length);
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
         { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
@@ -868,6 +988,7 @@
     }, this);
     o.isMatches = v === "matches";
     o.goMatches = function () { this.go("matches"); }.bind(this);
+    o.goStatsH2H = function () { this.setState({ view: "stats", statTab: "h2h", mobileMenuOpen: false }); }.bind(this);
     o.mobileMenuOpen = !!this.state.mobileMenuOpen;
     o.toggleMobileMenu = function () { this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }); }.bind(this);
     o.closeMobileMenu = function () { this.setState({ mobileMenuOpen: false }); }.bind(this);

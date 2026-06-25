@@ -47,13 +47,67 @@ function acronymMap(comp) {
 }
 
 function teamName(code, map) {
-  const rawName = map[String(code || "").toUpperCase()] || code;
+  const rawCode = String(code || "").toUpperCase();
+  const baseCode = rawCode.replace(/\d+$/, "");
+  const rawName = map[rawCode] || map[baseCode] || code;
   const cleaned = String(rawName || "")
     .replace(/\s+FC\s+No players$/i, "")
     .replace(/\s+No players$/i, "")
     .trim();
   if (/^OBC(?:\s+FC)?$/i.test(cleaned)) return "OBC";
+  if (/^Barnet\s+F\.?C$/i.test(cleaned)) return "Barnet FC";
+  if (/^TEA\d+$/i.test(cleaned) || /^Team of the year\s+TEA\d+$/i.test(cleaned)) return "Team of the year";
   return cleaned;
+}
+
+function parseCompetitorMatchText(text, self, map) {
+  const src = String(text || "").trim();
+  if (!src || /^No date$/i.test(src)) return null;
+  const selfName = teamName(self.acronym || self.name, map);
+  let m = src.match(/^(Win|Loss|Tie)([A-Z][A-Z0-9]{1,5})(\d+)\s+--\s+(\d+)$/i);
+  if (m) {
+    return {
+      date: "No date",
+      home: selfName,
+      away: teamName(m[2], map),
+      hs: Number(m[3]),
+      as: Number(m[4]),
+      status: "played",
+      raw: src
+    };
+  }
+  m = src.match(/^([A-Z][A-Z0-9]{1,5})(Home|Away)(.*?)(\d+)\s+--\s+(\d+)(Win|Loss|Tie)$/i);
+  if (m) {
+    const opponent = teamName(m[1], map);
+    const isHome = /^Home$/i.test(m[2]);
+    return {
+      date: String(m[3] || "").trim() || "No date",
+      home: isHome ? selfName : opponent,
+      away: isHome ? opponent : selfName,
+      hs: Number(m[4]),
+      as: Number(m[5]),
+      status: "played",
+      raw: src
+    };
+  }
+  return null;
+}
+
+function matchSignature(row) {
+  if (!row.home || !row.away || row.hs == null || row.as == null) return "";
+  const teams = [row.home, row.away].sort();
+  const goals = {};
+  goals[row.home] = row.hs;
+  goals[row.away] = row.as;
+  return [
+    row.competition,
+    row.sourceCompetition,
+    row.season,
+    teams[0],
+    goals[teams[0]],
+    teams[1],
+    goals[teams[1]]
+  ].join("|");
 }
 
 function seasonFromName(name) {
@@ -81,6 +135,7 @@ function parseMatchText(text, map) {
 
 function build() {
   const matches = [];
+  const seenCompetitorMatches = new Set();
   raw.competitions.forEach((comp) => {
     const map = acronymMap(comp);
     (comp.matches || []).forEach((m, idx) => {
@@ -94,6 +149,25 @@ function build() {
         href: m.href,
         raw: m.text,
         ...parsed
+      });
+    });
+    (comp.competitors || []).forEach((competitor, teamIdx) => {
+      (competitor.matches || []).forEach((m, idx) => {
+        const parsed = parseCompetitorMatchText(m.text, competitor, map);
+        if (!parsed || !parsed.home || !parsed.away) return;
+        const row = {
+          id: `${comp.href || comp.name}:team:${teamIdx}:${idx}`,
+          competition: comp.category || comp.name,
+          sourceCompetition: comp.name,
+          season: seasonFromName(comp.name),
+          gameweek: "",
+          href: competitor.href,
+          ...parsed
+        };
+        const sig = matchSignature(row);
+        if (sig && seenCompetitorMatches.has(sig)) return;
+        if (sig) seenCompetitorMatches.add(sig);
+        matches.push(row);
       });
     });
   });
