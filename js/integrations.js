@@ -102,10 +102,6 @@
       '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);padding:20px 22px;">' +
         '<div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;margin-bottom:12px;">Recent scorelines</div><sc-for list="{{ h2hMatchRows }}" as="m" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;border-top:1px solid #EEF4F4;padding:12px 0;"><span style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;"><span style="font-size:12px;font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.home }}</span><dc-import name="TeamBadge" team="{{ m.home }}" size="26" hint-size="26px,26px"></dc-import></span><span style="font-size:16px;font-weight:900;color:#48246C;font-variant-numeric:tabular-nums;">{{ m.score }}</span><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ m.away }}" size="26" hint-size="26px,26px"></dc-import><span style="font-size:12px;font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.away }}</span></span><div style="grid-column:1/-1;text-align:center;font-size:10px;font-weight:800;color:#5C5470;">{{ m.competition }} · {{ m.season }}</div></div></sc-for><sc-if value="{{ h2hNoMatchRows }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;text-align:center;color:#5C5470;font-weight:700;background:#FAFCFC;border-radius:16px;">No scorelines recorded yet for this pair.</div></sc-if>' +
       '</div>' +
-    '</div>' +
-    '<div style="margin-top:18px;background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
-      '<div style="padding:20px 22px;background:#FAFCFC;border-bottom:1px solid #E2ECEE;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;">{{ h2hA }} against every team</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:4px;">Played, wins, draws, losses, goals and competitions from the archive.</div></div><div style="font-size:24px;font-weight:300;color:#48246C;">{{ h2hAllOpponents }}</div></div>' +
-      '<div style="overflow-x:auto;padding:0 22px 18px;"><div style="min-width:760px;"><div style="display:grid;grid-template-columns:1.4fr repeat(6,52px) 1.2fr;gap:8px;padding:14px 0;font-size:11px;font-weight:900;text-transform:uppercase;color:#5C5470;"><span>Opponent</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GF</span><span>GA</span><span>Competitions</span></div><sc-for list="{{ h2hOpponentRows }}" as="r" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:1.4fr repeat(6,52px) 1.2fr;gap:8px;align-items:center;border-top:1px solid #EEF4F4;padding:12px 0;font-size:12px;font-weight:800;color:#281F38;"><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ r.opponent }}" size="28" hint-size="28px,28px"></dc-import><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.opponent }}</span></span><span>{{ r.p }}</span><span style="color:#067C7C;">{{ r.w }}</span><span style="color:#A09AAE;">{{ r.d }}</span><span style="color:#C03048;">{{ r.l }}</span><span style="color:#48246C;">{{ r.gf }}</span><span style="color:#5C5470;">{{ r.ga }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#5C5470;">{{ r.competitions }}</span></div></sc-for></div></div>' +
     '</div>';
   var h2hAnchor = '<sc-if value="{{ h2hNoMeetings }}" hint-placeholder-val="{{ false }}">';
   if (template.indexOf(h2hAnchor) >= 0) template = template.replace(h2hAnchor, H2H_DETAILS + h2hAnchor);
@@ -116,7 +112,7 @@
       '<div style="max-width:1200px;margin:0 auto;padding:36px 22px 34px;">' +
         '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#90C0E4;">Fixtures & results</div>' +
         '<h2 style="font-size:38px;font-weight:900;margin:8px 0 8px;letter-spacing:-.02em;">Matches archive</h2>' +
-        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Filter every recorded fixture, scoreline, awarded result note, and team head-to-head from the Lega archive.</p>' +
+        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Browse current fixtures, old seasons, matchweeks, results, and rivalry scorelines from the Lega archive.</p>' +
       '</div>' +
     '</section>' +
     '<section style="max-width:1200px;margin:0 auto;padding:24px 22px 72px;">' +
@@ -130,27 +126,33 @@
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Matches shown</div><div style="font-size:30px;font-weight:300;color:#48246C;">{{ matchShown }}</div></div>' +
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Played</div><div style="font-size:30px;font-weight:300;color:#067C7C;">{{ matchPlayed }}</div></div>' +
         '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Goals</div><div style="font-size:30px;font-weight:300;color:#F0B418;">{{ matchGoals }}</div></div>' +
-        '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Result notes</div><div style="font-size:30px;font-weight:300;color:#C03048;">{{ matchRaw }}</div></div>' +
+        '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:16px;padding:16px;"><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:#5C5470;">Fixtures</div><div style="font-size:30px;font-weight:300;color:#C03048;">{{ matchFixtures }}</div></div>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:1.35fr .85fr;gap:18px;align-items:start;">' +
-        '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:20px;padding:0 20px 20px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
-          '<div style="display:grid;grid-template-columns:1.4fr .9fr .75fr .65fr;gap:12px;padding:16px 0;font-size:12px;font-weight:900;text-transform:uppercase;color:#5C5470;border-bottom:1px solid #E2ECEE;"><div>Match</div><div>Competition</div><div>Season</div><div style="text-align:right;">Status</div></div>' +
-          '<sc-for list="{{ matchRows }}" as="m" hint-placeholder-count="10">' +
-            '<div style="display:grid;grid-template-columns:1.4fr .9fr .75fr .65fr;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #EEF4F4;">' +
-              '<div><div style="font-size:11px;color:#A09AAE;font-weight:800;margin-bottom:8px;">{{ m.displayDate }}</div><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;min-width:0;"><span style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;"><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.homeLabel }}</span><dc-import name="TeamBadge" team="{{ m.homeBadge }}" size="30" hint-size="30px,30px"></dc-import></span><span style="font-size:18px;font-weight:900;color:#48246C;font-variant-numeric:tabular-nums;min-width:58px;text-align:center;">{{ m.score }}</span><span style="display:flex;align-items:center;gap:8px;min-width:0;"><dc-import name="TeamBadge" team="{{ m.awayBadge }}" size="30" hint-size="30px,30px"></dc-import><span style="font-weight:800;color:#281F38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.awayLabel }}</span></span></div><div style="font-size:11px;color:#5C5470;font-weight:700;margin-top:7px;">{{ m.time }}</div><div style="font-size:11px;color:#C03048;font-weight:700;margin-top:4px;">{{ m.rawLine }}</div></div>' +
-              '<div style="font-size:13px;font-weight:800;color:#48246C;">{{ m.competition }}</div>' +
-              '<div style="font-size:13px;font-weight:700;color:#5C5470;">{{ m.season }} · {{ m.gameweek }}</div>' +
-              '<div style="text-align:right;"><span style="display:inline-block;border-radius:999px;padding:6px 10px;background:{{ m.statusBg }};color:{{ m.statusColor }};font-size:11px;font-weight:900;text-transform:uppercase;">{{ m.status }}</span></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start;">' +
+        '<div style="background:#2C0630;color:#fff;border-radius:24px;padding:0 20px 26px;box-shadow:0 18px 50px rgba(44,21,69,.18);overflow:hidden;">' +
+          '<div style="display:flex;align-items:center;justify-content:center;gap:18px;padding:24px 0 18px;"><button onClick="{{ prevMatchWeek }}" style="width:44px;height:44px;border:0;border-radius:999px;background:#4B0B55;color:#fff;font-size:24px;cursor:pointer;">‹</button><div style="text-align:center;"><div style="font-size:22px;font-weight:900;">{{ matchWeekTitle }}</div><div style="font-size:13px;font-weight:700;color:#CFC0E0;margin-top:3px;">{{ matchWeekSub }}</div></div><button onClick="{{ nextMatchWeek }}" style="width:44px;height:44px;border:0;border-radius:999px;background:#5C0F68;color:#fff;font-size:24px;cursor:pointer;">›</button></div>' +
+          '<sc-for list="{{ matchDateGroups }}" as="g" hint-placeholder-count="3">' +
+            '<div style="background:#350039;border-radius:18px;margin-top:14px;overflow:hidden;">' +
+              '<div style="font-size:20px;font-weight:900;padding:18px 20px;background:#300034;">{{ g.date }}</div>' +
+              '<sc-for list="{{ g.rows }}" as="m" hint-placeholder-count="5">' +
+                '<div style="display:grid;grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr) auto;gap:16px;align-items:center;padding:22px 18px;border-top:1px solid rgba(255,255,255,.16);">' +
+                  '<div style="display:flex;align-items:center;gap:10px;justify-content:flex-end;min-width:0;"><span style="font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.homeLabel }}</span><dc-import name="TeamBadge" team="{{ m.homeBadge }}" size="34" hint-size="34px,34px"></dc-import></div>' +
+                  '<div style="min-width:72px;text-align:center;font-size:20px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;">{{ m.score }}</div>' +
+                  '<div style="display:flex;align-items:center;gap:10px;min-width:0;"><dc-import name="TeamBadge" team="{{ m.awayBadge }}" size="34" hint-size="34px,34px"></dc-import><span style="font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.awayLabel }}</span></div>' +
+                  '<div style="text-align:right;"><span style="display:inline-block;border-radius:999px;padding:7px 11px;background:rgba(240,180,24,.15);color:#F0B418;font-size:10px;font-weight:900;text-transform:uppercase;">{{ m.status }}</span><div style="font-size:10px;font-weight:800;color:#CFC0E0;margin-top:5px;">{{ m.competition }} · {{ m.season }}</div></div>' +
+                '</div>' +
+              '</sc-for>' +
             '</div>' +
           '</sc-for>' +
-          '<sc-if value="{{ matchNoRows }}" hint-placeholder-val="{{ false }}"><div style="padding:32px 0;text-align:center;color:#5C5470;font-weight:700;">No matches match those filters.</div></sc-if>' +
+          '<sc-if value="{{ matchNoRows }}" hint-placeholder-val="{{ false }}"><div style="padding:32px 0;text-align:center;color:#D7ECF7;font-weight:700;">No played matches or fixtures match those filters.</div></sc-if>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:16px;">' +
           '<div style="background:#2C1545;color:#fff;border-radius:20px;padding:20px;">' +
-            '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#F0B418;margin-bottom:10px;">Head-to-head moved</div>' +
-            '<div style="font-size:20px;font-weight:900;line-height:1.2;">Use the Statistics head-to-head room for full club records.</div>' +
-            '<div style="margin-top:10px;font-size:13px;color:#D7ECF7;font-weight:700;line-height:1.5;">It now includes opponent-by-opponent records, competitions played, and scorelines from the deeper Challenge Place archive.</div>' +
-            '<span onClick="{{ goStatsH2H }}" style="display:block;text-align:center;margin-top:16px;cursor:pointer;background:#F0B418;color:#2C1545;border-radius:999px;padding:12px 14px;font-size:13px;font-weight:900;">Open head-to-head stats</span>' +
+            '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#F0B418;margin-bottom:14px;">Rivalry scorelines</div>' +
+            '<div style="display:grid;gap:10px;"><select value="{{ matchA }}" onChange="{{ onMatchA }}" style="{{ darkSelectStyle }}"><sc-for list="{{ matchTeamOptions }}" as="o" hint-placeholder-count="8"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select><select value="{{ matchB }}" onChange="{{ onMatchB }}" style="{{ darkSelectStyle }}"><sc-for list="{{ matchTeamOptions }}" as="o" hint-placeholder-count="8"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></div>' +
+            '<div style="margin-top:16px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center;"><div><div style="font-size:32px;font-weight:300;">{{ matchAWins }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">{{ matchALabel }} wins</div></div><div><div style="font-size:22px;font-weight:300;color:#CFC0E0;">{{ matchDraws }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">Draws</div></div><div><div style="font-size:32px;font-weight:300;">{{ matchBWins }}</div><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#90C0E4;">{{ matchBLabel }} wins</div></div></div>' +
+            '<div style="margin-top:12px;font-size:12px;color:#D7ECF7;font-weight:700;text-align:center;">{{ matchH2HPlayed }} meetings · {{ matchAGoals }}-{{ matchBGoals }} goals</div>' +
+            '<div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.16);padding-top:10px;"><sc-for list="{{ matchH2HRows }}" as="m" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:8px 0;font-size:12px;font-weight:800;"><span style="text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.home }}</span><span style="color:#F0B418;font-size:14px;">{{ m.score }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.away }}</span><div style="grid-column:1/-1;text-align:center;color:#90C0E4;font-size:10px;">{{ m.competition }} · {{ m.season }}</div></div></sc-for></div>' +
           '</div>' +
           '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:20px;padding:20px;">' +
             '<div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#067C7C;margin-bottom:12px;">Selected team record</div>' +
@@ -788,6 +790,27 @@
       return b.p - a.p || b.w - a.w || a.opponent.localeCompare(b.opponent);
     });
   }
+  function playerRecordCards(app) {
+    var rows = [];
+    Object.keys(app.players || {}).forEach(function (name) {
+      var byTeam = {};
+      ((app.players[name] || {}).recs || []).forEach(function (r) {
+        if (r.kind && r.kind !== "goals") return;
+        var team = teamLabel(r.team || (app.players[name] || {}).mainTeam || "Unlisted");
+        byTeam[team] = (byTeam[team] || 0) + Number(r.val || 0);
+      });
+      Object.keys(byTeam).forEach(function (team) {
+        if (byTeam[team] > 0) rows.push({ name: name, team: team, goals: byTeam[team] });
+      });
+    });
+    rows.sort(function (a, b) { return b.goals - a.goals || a.name.localeCompare(b.name); });
+    var cards = rows.slice(0, 3).map(function (r) {
+      return { big: String(r.goals), label: r.name + " goals for " + r.team, sub: "Player-team scoring record from the archive" };
+    });
+    cards.push({ big: "3", label: "Ayo goalkeeper free-kicks for MFM", sub: "Goalkeeper scoring record" });
+    cards.push({ big: "2", label: "Origi free-kicks in the 2020 Corona season", sub: "Most free-kicks recorded in one season" });
+    return cards;
+  }
   function teamRecord(rows, team) {
     team = canonTeam(team);
     var rec = { p: 0, w: 0, d: 0, l: 0 };
@@ -830,6 +853,45 @@
     }
     return { date: date || "Date TBC", time: time || "" };
   }
+  function isDisplayableMatch(m) {
+    var hasTeams = m.home && m.away;
+    var hasScore = m.hs != null && m.as != null && !isNaN(Number(m.hs)) && !isNaN(Number(m.as));
+    return hasTeams && (hasScore || m.status === "fixture");
+  }
+  function matchDisplayRow(m) {
+    var isPlayed = m.hs != null && m.as != null && m.home && m.away;
+    var status = isPlayed ? "Played" : "Fixture";
+    var dt = displayDateAndTime(m);
+    return {
+      homeLabel: teamLabel(m.home),
+      awayLabel: teamLabel(m.away),
+      homeBadge: teamLabel(m.home),
+      awayBadge: teamLabel(m.away),
+      score: isPlayed ? (m.hs + "-" + m.as) : (dt.time || "TBC"),
+      displayDate: dt.date,
+      time: dt.time,
+      competition: m.competition || "Archive",
+      season: m.season || "Archive",
+      gameweek: m.gameweek || "Archive",
+      status: status,
+      statusBg: status === "Played" ? "#E6F4F1" : "#FFF4D6",
+      statusColor: status === "Played" ? "#067C7C" : "#8A5A00"
+    };
+  }
+  function groupMatchesByDate(rows) {
+    var groups = [];
+    var byDate = {};
+    rows.forEach(function (m) {
+      var row = matchDisplayRow(m);
+      var key = row.displayDate || "Date TBC";
+      if (!byDate[key]) {
+        byDate[key] = { date: key, rows: [] };
+        groups.push(byDate[key]);
+      }
+      byDate[key].rows.push(row);
+    });
+    return groups;
+  }
   proto.matchesVals = function () {
     var self = this;
     var all = this.allMatchRows();
@@ -841,9 +903,9 @@
       if (m.away) arr.push(m.away);
       return arr;
     }, []));
-    var comp = this.state.matchComp || "";
-    var season = this.state.matchSeason || "";
-    var gw = this.state.matchGw || "";
+    var comp = this.state.matchComp == null ? "Lega League" : this.state.matchComp;
+    var season = this.state.matchSeason == null ? "2026/27" : this.state.matchSeason;
+    var gw = this.state.matchGw == null ? "GW1" : this.state.matchGw;
     var team = canonTeam(this.state.matchTeam || "");
     var filtered = all.filter(function (m) {
       if (comp && m.competition !== comp) return false;
@@ -852,9 +914,10 @@
       if (team && canonTeam(m.home) !== team && canonTeam(m.away) !== team) return false;
       return true;
     });
-    var played = numericRows(filtered);
+    var displayable = filtered.filter(isDisplayableMatch);
+    var played = numericRows(displayable);
+    var fixtures = displayable.filter(function (m) { return m.status === "fixture"; });
     var goals = played.reduce(function (n, m) { return n + Number(m.hs) + Number(m.as); }, 0);
-    var rawCount = filtered.filter(function (m) { return !m.home || !m.away || /raw|walkover/i.test(m.status || ""); }).length;
     var teamValues = teams.map(function (o) { return o.value; });
     var defaultA = teamValues.indexOf("Golden Stars") >= 0 ? "Golden Stars" : (teams[0] ? teams[0].value : "Golden Stars");
     var defaultB = teamValues.indexOf("Dynamo FC") >= 0 ? "Dynamo FC" : (teams[1] ? teams[1].value : "Dynamo FC");
@@ -865,6 +928,13 @@
     var recTeam = team || matchA || defaultA;
     var rec = teamRecord(all, recTeam);
     var compRecords = teamRecordByCompetition(all, recTeam);
+    var h2hRows = h2hMatchRows(all, matchA, matchB).slice(0, 5);
+    var groups = groupMatchesByDate(displayable.slice(0, 140));
+    var weekNo = Number(String(gw || "").replace(/\D+/g, "")) || 0;
+    var setGw = function (n) {
+      if (!n || n < 1) return;
+      self.setState({ matchGw: "GW" + n });
+    };
     return {
       matchComp: comp,
       matchSeason: season,
@@ -876,35 +946,19 @@
       matchSeasonOptions: seasons,
       matchGwOptions: weeks,
       matchTeamOptions: teams,
-      matchShown: String(filtered.length),
+      matchShown: String(displayable.length),
       matchPlayed: String(played.length),
       matchGoals: String(goals),
-      matchRaw: String(rawCount),
-      matchRows: filtered.slice(0, 140).map(function (m) {
-        var isPlayed = m.hs != null && m.as != null && m.home && m.away;
-        var status = isPlayed ? "Played" : (m.status === "fixture" ? "Fixture" : "Recorded");
-        var rawOnly = !m.home || !m.away;
-        var dt = displayDateAndTime(m);
-        return {
-          homeLabel: rawOnly ? "Recorded result note" : teamLabel(m.home),
-          awayLabel: rawOnly ? "" : teamLabel(m.away),
-          homeBadge: rawOnly ? "Lega World" : teamLabel(m.home),
-          awayBadge: rawOnly ? "Lega World" : teamLabel(m.away),
-          score: isPlayed ? (m.hs + "-" + m.as) : (rawOnly ? "" : "vs"),
-          displayDate: dt.date,
-          time: dt.time,
-          rawLine: rawOnly || /raw|walkover/i.test(m.status || "") ? String(m.raw || "").replace(/walkover/ig, "awarded result") : "",
-          competition: m.competition || "Archive",
-          season: m.season || "Archive",
-          gameweek: m.gameweek || "Archive",
-          status: status,
-          statusBg: status === "Played" ? "#E6F4F1" : (status === "Fixture" ? "#FFF4D6" : "#FDE8ED"),
-          statusColor: status === "Played" ? "#067C7C" : (status === "Fixture" ? "#8A5A00" : "#C03048")
-        };
-      }),
-      matchNoRows: filtered.length === 0,
+      matchFixtures: String(fixtures.length),
+      matchRows: displayable.slice(0, 140).map(matchDisplayRow),
+      matchDateGroups: groups,
+      matchNoRows: displayable.length === 0,
+      matchWeekTitle: gw ? ("Matchweek " + (weekNo || String(gw).replace(/^GW/i, ""))) : "All weeks",
+      matchWeekSub: groups.length ? groups.map(function (g) { return g.date; }).slice(0, 2).join(" - ") : "No fixtures",
+      prevMatchWeek: function () { setGw(weekNo - 1); },
+      nextMatchWeek: function () { setGw(weekNo + 1); },
       onMatchComp: function (e) { self.setState({ matchComp: e.target.value }); },
-      onMatchSeason: function (e) { self.setState({ matchSeason: e.target.value }); },
+      onMatchSeason: function (e) { self.setState({ matchSeason: e.target.value, matchGw: "" }); },
       onMatchGw: function (e) { self.setState({ matchGw: e.target.value }); },
       onMatchTeam: function (e) { self.setState({ matchTeam: e.target.value }); },
       onMatchA: function (e) { self.setState({ matchA: e.target.value }); },
@@ -915,6 +969,7 @@
       matchH2HPlayed: String(hh.played),
       matchAGoals: String(hh.aGoals),
       matchBGoals: String(hh.bGoals),
+      matchH2HRows: h2hRows,
       matchALabel: teamLabel(matchA),
       matchBLabel: teamLabel(matchB),
       matchRecordTeam: teamLabel(recTeam),
@@ -970,6 +1025,9 @@
       o.sRecCards = o.sRecCards.concat([
         { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
       ]);
+    }
+    if (o.sRecCards && !o.sRecCards.some(function (r) { return /goalkeeper free-kicks/i.test(r.label || ""); })) {
+      o.sRecCards = o.sRecCards.concat(playerRecordCards(this));
     }
     return o;
   };
