@@ -575,7 +575,7 @@
         });
       });
     });
-    return rows.concat(legaCupFixtures());
+    return rows.concat(legaCupFixtures()).concat(grayCupFixtures());
   }
   function roundRobin(sourceTeams) {
     var teams = sourceTeams.slice();
@@ -616,18 +616,50 @@
   }
   function legaCupFixtures() {
     return [
-      ["Cup QF", "Sat 26 Sep", "16:00", "Dynamo FC", "Royal FC"],
-      ["Cup QF", "Sun 27 Sep", "15:00", "Golden Stars", "Kings FC"],
-      ["Cup QF", "Sun 27 Sep", "15:00", "MFM", "Future Stars"],
-      ["Cup SF", "Sat 31 Oct", "16:00", "Winner QF1", "Fly Eagles"],
-      ["Cup SF", "Sun 1 Nov", "15:00", "Winner QF2", "Winner QF3"],
-      ["Cup Final", "Sun 10 Jan", "15:00", "Winner SF1", "Winner SF2"]
+      ["Cup QF", "Sat 26 Sep", "16:00", "Golden Stars", "Royal FC"],
+      ["Cup QF", "Sun 27 Sep", "15:00", "MFM", "Kings FC"],
+      ["Cup QF", "Sun 27 Sep", "15:00", "Fly Eagles", "Future Stars"],
+      ["Cup SF", "Sat 31 Oct", "16:00", "Dynamo FC", "Winner QF2"],
+      ["Cup SF", "Sun 1 Nov", "15:00", "Winner QF1", "Winner QF3"],
+      ["Cup Final", "Sun 13 Dec", "15:00", "Winner SF1", "Winner SF2"]
     ].map(function (r, idx) {
       return {
-        id: "current:lega-cup:2026-27:" + idx,
+        id: "current:lega-cup:2026:" + idx,
         competition: "Lega Cup",
-        sourceCompetition: "2026/27 fixtures",
-        season: "2026/27",
+        sourceCompetition: "2026 draw",
+        season: "2026",
+        gameweek: r[0],
+        date: r[1],
+        time: r[2],
+        home: canonTeam(r[3]),
+        away: canonTeam(r[4]),
+        hs: null,
+        as: null,
+        status: "fixture",
+        raw: ""
+      };
+    });
+  }
+  function grayCupFixtures() {
+    return [
+      ["Group A", "Sat 15 Aug", "16:00", "Golden Stars", "Kings FC"],
+      ["Group A", "Sat 15 Aug", "16:00", "Fly Eagles", "Future Stars"],
+      ["Group B", "Sun 16 Aug", "15:00", "Dynamo FC", "Royal FC"],
+      ["Group B", "Sat 22 Aug", "16:00", "MFM", "Dynamo FC"],
+      ["Group A", "Sat 22 Aug", "16:00", "Golden Stars", "Fly Eagles"],
+      ["Group A", "Sat 22 Aug", "16:00", "Kings FC", "Future Stars"],
+      ["Group B", "Sun 23 Aug", "15:00", "MFM", "Royal FC"],
+      ["Group A", "Sun 23 Aug", "15:00", "Golden Stars", "Future Stars"],
+      ["Group A", "Sun 23 Aug", "15:00", "Kings FC", "Fly Eagles"],
+      ["Semi-final", "Sat 29 Aug", "16:00", "Winner Group A", "Runner-up Group B"],
+      ["Semi-final", "Sat 29 Aug", "16:00", "Winner Group B", "Runner-up Group A"],
+      ["Final", "Sun 30 Aug", "15:00", "Winner SF1", "Winner SF2"]
+    ].map(function (r, idx) {
+      return {
+        id: "current:gray-cup:2026:" + idx,
+        competition: "Gray Cup",
+        sourceCompetition: "2026 draw",
+        season: "2026",
         gameweek: r[0],
         date: r[1],
         time: r[2],
@@ -957,7 +989,7 @@
       matchWeekSub: groups.length ? groups.map(function (g) { return g.date; }).slice(0, 2).join(" - ") : "No fixtures",
       prevMatchWeek: function () { setGw(weekNo - 1); },
       nextMatchWeek: function () { setGw(weekNo + 1); },
-      onMatchComp: function (e) { self.setState({ matchComp: e.target.value }); },
+      onMatchComp: function (e) { self.setState({ matchComp: e.target.value, matchGw: e.target.value === "Lega League" ? "GW1" : "" }); },
       onMatchSeason: function (e) { self.setState({ matchSeason: e.target.value, matchGw: "" }); },
       onMatchGw: function (e) { self.setState({ matchGw: e.target.value }); },
       onMatchTeam: function (e) { self.setState({ matchTeam: e.target.value }); },
