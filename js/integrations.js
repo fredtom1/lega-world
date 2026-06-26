@@ -315,6 +315,16 @@
     app.freeKickData["Nova fc"] = app.freeKickData["Nova fc"] || {};
     app.freeKickData["Nova fc"].Tommy = Math.max(app.freeKickData["Nova fc"].Tommy || 0, 4);
   }
+  function applyArchiveCorrections(app) {
+    (app.archive || []).forEach(function (league) {
+      (league.seasons || []).forEach(function (season) {
+        if (season.name !== "Lega League 2020 (corona)") return;
+        (season.topScorers || []).forEach(function (row) {
+          if (row[0] === "Dami") row[1] = "Nova fc";
+        });
+      });
+    });
+  }
   function playerStatExtra(name) {
     name = canonPlayer(name);
     var totals = challengePlayerData().playerTotals || {};
@@ -461,6 +471,7 @@
   var origBuildPlayers = proto.buildPlayers;
   proto.buildPlayers = function () {
     applyManualRecords(this);
+    applyArchiveCorrections(this);
     var cd = challengeData();
     var rosters = cd.rosters || {};
     Object.keys(rosters).forEach(function (team) {
@@ -808,6 +819,45 @@
       return m.home && m.away && m.hs != null && m.as != null && !isNaN(Number(m.hs)) && !isNaN(Number(m.as));
     });
   }
+  function isWalkoverRow(m) {
+    return /walkover/i.test(String((m && m.status) || "") + " " + String((m && m.raw) || ""))
+      || /^no date$/i.test(String((m && m.date) || "").trim());
+  }
+  function actualGoalRows(rows) {
+    return numericRows(rows).filter(function (m) { return !isWalkoverRow(m); });
+  }
+  function actualTeamGoalRows(rows) {
+    var totals = {};
+    actualGoalRows(rows).forEach(function (m) {
+      var home = canonTeam(m.home), away = canonTeam(m.away);
+      totals[home] = (totals[home] || 0) + Number(m.hs || 0);
+      totals[away] = (totals[away] || 0) + Number(m.as || 0);
+    });
+    var max = Math.max.apply(null, [1].concat(Object.values(totals)));
+    return Object.keys(totals).map(function (team) {
+      return { team: teamLabel(team), val: totals[team], w: (totals[team] / max * 100).toFixed(1) };
+    }).sort(function (a, b) { return b.val - a.val || a.team.localeCompare(b.team); }).slice(0, 8).map(function (row, idx) {
+      return Object.assign({ rank: idx + 1 }, row);
+    });
+  }
+  function scoreForTeam(m, team) {
+    var home = canonTeam(m.home);
+    return {
+      gf: home === team ? Number(m.hs) : Number(m.as),
+      ga: home === team ? Number(m.as) : Number(m.hs)
+    };
+  }
+  function addResultRecord(rec, gf, ga, competition, countGoals) {
+    rec.p += 1;
+    if (countGoals) {
+      rec.gf += gf;
+      rec.ga += ga;
+    }
+    if (gf > ga) rec.w += 1;
+    else if (gf === ga) rec.d += 1;
+    else rec.l += 1;
+    if (competition && rec.comps) rec.comps[competition] = 1;
+  }
   function h2hFromRows(rows, a, b) {
     a = canonTeam(a); b = canonTeam(b);
     var out = { aWins: 0, bWins: 0, draws: 0, played: 0, aGoals: 0, bGoals: 0 };
@@ -817,8 +867,10 @@
       var ag = home === a ? Number(m.hs) : Number(m.as);
       var bg = home === a ? Number(m.as) : Number(m.hs);
       out.played += 1;
-      out.aGoals += ag;
-      out.bGoals += bg;
+      if (!isWalkoverRow(m)) {
+        out.aGoals += ag;
+        out.bGoals += bg;
+      }
       if (ag > bg) out.aWins += 1;
       else if (bg > ag) out.bWins += 1;
       else out.draws += 1;
@@ -832,15 +884,6 @@
       return (home === a && away === b) || (home === b && away === a);
     });
   }
-  function addRecord(rec, gf, ga, competition) {
-    rec.p += 1;
-    rec.gf += gf;
-    rec.ga += ga;
-    if (gf > ga) rec.w += 1;
-    else if (gf === ga) rec.d += 1;
-    else rec.l += 1;
-    if (competition) rec.comps[competition] = 1;
-  }
   function h2hCompetitionRows(rows, a, b) {
     a = canonTeam(a);
     var out = {};
@@ -850,7 +893,7 @@
       var home = canonTeam(m.home);
       var gf = home === a ? Number(m.hs) : Number(m.as);
       var ga = home === a ? Number(m.as) : Number(m.hs);
-      addRecord(rec, gf, ga, key);
+      addResultRecord(rec, gf, ga, key, !isWalkoverRow(m));
     });
     return Object.keys(out).sort().map(function (key) {
       var rec = out[key];
@@ -876,9 +919,8 @@
       if (home !== team && away !== team) return;
       var opponent = home === team ? away : home;
       var rec = out[opponent] || (out[opponent] = { opponent: opponent, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, comps: {} });
-      var gf = home === team ? Number(m.hs) : Number(m.as);
-      var ga = home === team ? Number(m.as) : Number(m.hs);
-      addRecord(rec, gf, ga, m.competition || "Records");
+      var score = scoreForTeam(m, team);
+      addResultRecord(rec, score.gf, score.ga, m.competition || "Records", !isWalkoverRow(m));
     });
     return Object.keys(out).map(function (opponent) {
       var rec = out[opponent];
@@ -968,14 +1010,8 @@
     numericRows(rows).forEach(function (m) {
       var home = canonTeam(m.home), away = canonTeam(m.away);
       if (home !== team && away !== team) return;
-      var gf = home === team ? Number(m.hs) : Number(m.as);
-      var ga = home === team ? Number(m.as) : Number(m.hs);
-      rec.p += 1;
-      rec.gf += gf;
-      rec.ga += ga;
-      if (gf > ga) rec.w += 1;
-      else if (gf === ga) rec.d += 1;
-      else rec.l += 1;
+      var score = scoreForTeam(m, team);
+      addResultRecord(rec, score.gf, score.ga, m.competition || "Records", !isWalkoverRow(m));
     });
     return rec;
   }
@@ -1099,7 +1135,7 @@
     var displayable = filtered.filter(isDisplayableMatch);
     var played = numericRows(displayable);
     var fixtures = displayable.filter(function (m) { return m.status === "fixture"; });
-    var goals = played.reduce(function (n, m) { return n + Number(m.hs) + Number(m.as); }, 0);
+    var goals = actualGoalRows(displayable).reduce(function (n, m) { return n + Number(m.hs) + Number(m.as); }, 0);
     var teamValues = teams.map(function (o) { return o.value; });
     var defaultA = teamValues.indexOf("Golden Stars") >= 0 ? "Golden Stars" : (teams[0] ? teams[0].value : "Golden Stars");
     var defaultB = teamValues.indexOf("Dynamo FC") >= 0 ? "Dynamo FC" : (teams[1] ? teams[1].value : "Dynamo FC");
@@ -1175,6 +1211,7 @@
   proto.statsVals = function () {
     var o = origStatsVals.call(this);
     var all = this.allMatchRows ? this.allMatchRows() : [];
+    var actualTeamGoals = actualTeamGoalRows(all);
     var teamsFromMatches = [];
     all.forEach(function (m) {
       if (m.home) teamsFromMatches.push(canonTeam(m.home));
@@ -1203,6 +1240,7 @@
     o.h2hNoMatchRows = matchRows.length === 0;
     o.h2hOpponentRows = oppRows;
     o.h2hAllOpponents = String(oppRows.length);
+    if (actualTeamGoals.length) o.sTeamGoalsLB = actualTeamGoals;
     var club = canonTeam(this.state.clubTeam || o.sClubValue || o.sClub || "");
     var cards = disciplineCards(club, o.sClubRedTotal || maxTotal(o.sClubRedRows), o.sClubYellow, o.sClubFkTotal || maxTotal(o.sClubFkRows));
     o.sClub = teamLabel(club);
@@ -1216,7 +1254,15 @@
     var matchCards = clubMatchCards(all, club);
     o.sClubMatchCards = matchCards.rows;
     o.sClubMatchNote = matchCards.record.p ? "Our records checked" : "No matches logged";
-    o.sClubGoals = String(Math.max(safeNumber(o.sClubGoals), matchCards.record.gf));
+    o.sClubGoals = matchCards.record.p ? String(matchCards.record.gf) : String(safeNumber(o.sClubGoals));
+    if (o.sRecCards && actualTeamGoals.length) {
+      o.sRecCards = o.sRecCards.map(function (card) {
+        if (/all-time Lega League goals/i.test(card.label || "")) {
+          return { big: String(actualTeamGoals[0].val), label: actualTeamGoals[0].team + " actual match goals", sub: "Walkover goals excluded" };
+        }
+        return card;
+      });
+    }
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
         { big: "Records", label: "Most awarded-result wins", sub: "Tracked from our result notes" }
