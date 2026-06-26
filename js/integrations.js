@@ -111,8 +111,13 @@
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#067C7C;">Team discipline</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Own goals, cards and free-kicks from the Challenge Place archive.</div></div><div style="font-size:12px;font-weight:900;color:#48246C;">{{ sClubDisciplineNote }}</div></div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;"><sc-for list="{{ sClubDisciplineRows }}" as="d" hint-placeholder-count="4"><div style="background:#FAFCFC;border:1px solid #E2ECEE;border-radius:14px;padding:14px;text-align:center;"><div style="font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;color:{{ d.color }};">{{ d.val }}</div><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#5C5470;margin-top:3px;">{{ d.label }}</div></div></sc-for></div>' +
     '</div>';
+  var CLUB_MATCH_RECORD =
+    '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;padding:18px 22px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#48246C;">Team match record</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Played, wins, draws, losses and goals from recorded Challenge Place matches.</div></div><div style="font-size:12px;font-weight:900;color:#067C7C;">{{ sClubMatchNote }}</div></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:12px;"><sc-for list="{{ sClubMatchCards }}" as="m" hint-placeholder-count="6"><div style="background:#FAFCFC;border:1px solid #E2ECEE;border-radius:14px;padding:14px;text-align:center;"><div style="font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;color:{{ m.color }};">{{ m.val }}</div><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#5C5470;margin-top:3px;">{{ m.label }}</div></div></sc-for></div>' +
+    '</div>';
   var clubGaAnchor = '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;overflow:hidden;">\n        <div onClick="{{ toggleGa }}"';
-  if (template.indexOf(clubGaAnchor) >= 0) template = template.replace(clubGaAnchor, CLUB_DISCIPLINE + clubGaAnchor);
+  if (template.indexOf(clubGaAnchor) >= 0) template = template.replace(clubGaAnchor, CLUB_MATCH_RECORD + CLUB_DISCIPLINE + clubGaAnchor);
 
   var MATCHES_PAGE =
     '<sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">' +
@@ -930,6 +935,37 @@
       ]
     };
   }
+  function clubMatchRecord(rows, team) {
+    team = canonTeam(team);
+    var rec = { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 };
+    numericRows(rows).forEach(function (m) {
+      var home = canonTeam(m.home), away = canonTeam(m.away);
+      if (home !== team && away !== team) return;
+      var gf = home === team ? Number(m.hs) : Number(m.as);
+      var ga = home === team ? Number(m.as) : Number(m.hs);
+      rec.p += 1;
+      rec.gf += gf;
+      rec.ga += ga;
+      if (gf > ga) rec.w += 1;
+      else if (gf === ga) rec.d += 1;
+      else rec.l += 1;
+    });
+    return rec;
+  }
+  function clubMatchCards(rows, team) {
+    var rec = clubMatchRecord(rows, team);
+    return {
+      record: rec,
+      rows: [
+        { label: "Played", val: String(rec.p), color: "#48246C" },
+        { label: "Wins", val: String(rec.w), color: "#067C7C" },
+        { label: "Draws", val: String(rec.d), color: "#A09AAE" },
+        { label: "Losses", val: String(rec.l), color: "#C03048" },
+        { label: "Goals for", val: String(rec.gf), color: "#F0B418" },
+        { label: "Goals against", val: String(rec.ga), color: "#5C5470" }
+      ]
+    };
+  }
   function teamRecord(rows, team) {
     team = canonTeam(team);
     var rec = { p: 0, w: 0, d: 0, l: 0 };
@@ -1150,6 +1186,10 @@
     o.sClubOwnGoals = String(cards.ownGoals);
     o.sClubDisciplineRows = cards.rows;
     o.sClubDisciplineNote = cards.ownGoals || cards.redCards || cards.yellowCards || cards.deadBallGoals ? "Challenge checked" : "No incidents logged";
+    var matchCards = clubMatchCards(all, club);
+    o.sClubMatchCards = matchCards.rows;
+    o.sClubMatchNote = matchCards.record.p ? "Match archive checked" : "No matches logged";
+    o.sClubGoals = String(Math.max(safeNumber(o.sClubGoals), matchCards.record.gf));
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
         { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }

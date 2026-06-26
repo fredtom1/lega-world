@@ -1,7 +1,7 @@
 /* Generated from expanded Challenge Place player statistics. */
 (function(){
   window.LEGA_CHALLENGE_PLAYER_DATA = {
-  "extractedAt": "2026-06-24T23:54:35.868Z",
+  "extractedAt": "2026-06-26T16:48:50.211Z",
   "byCompetition": {
     "Lega League ⚽": {
       "goals": [
@@ -1151,7 +1151,7 @@
         },
         {
           "name": "Ope (origi)",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 3
         },
         {
@@ -1276,7 +1276,7 @@
         },
         {
           "name": "Iwobi",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -1296,7 +1296,7 @@
         },
         {
           "name": "Neymar",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -1346,7 +1346,7 @@
         },
         {
           "name": "Tope",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -2002,7 +2002,7 @@
         },
         {
           "name": "Hazard",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 5
         },
         {
@@ -2252,7 +2252,7 @@
         },
         {
           "name": "Ope (origi)",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -2292,7 +2292,7 @@
         },
         {
           "name": "Tomiwa",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -2441,7 +2441,7 @@
         },
         {
           "name": "Ileri",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -2538,7 +2538,7 @@
         },
         {
           "name": "Abiola",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         },
         {
@@ -2701,7 +2701,7 @@
         },
         {
           "name": "Tope",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "val": 1
         }
       ],
@@ -2893,7 +2893,7 @@
       "teams": {
         "Future Stars": 1,
         "Fc Eagles": 1,
-        "Philadelphia Fc": 1,
+        "Philadelphia FC": 1,
         "All Stars": 1,
         "Dynamo FC": 1
       },
@@ -2936,7 +2936,7 @@
         },
         {
           "competition": "Lega league 2020/2021",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 1
         },
@@ -2972,7 +2972,7 @@
         },
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "penaltiesMissed",
           "val": 1
         },
@@ -5929,7 +5929,7 @@
     "Hazard": {
       "teams": {
         "Dynamo FC": 1,
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 12,
       "assists": 1,
@@ -5949,7 +5949,7 @@
         },
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 5
         }
@@ -6243,7 +6243,7 @@
     },
     "Ope (origi)": {
       "teams": {
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 4,
       "assists": 0,
@@ -6251,13 +6251,13 @@
       "records": [
         {
           "competition": "Lega league 2020/2021",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 3
         },
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 1
         }
@@ -6647,7 +6647,7 @@
     },
     "Iwobi": {
       "teams": {
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 1,
       "assists": 0,
@@ -6655,7 +6655,7 @@
       "records": [
         {
           "competition": "Lega league 2020/2021",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 1
         }
@@ -6698,7 +6698,7 @@
     },
     "Neymar": {
       "teams": {
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 1,
       "assists": 0,
@@ -6706,7 +6706,7 @@
       "records": [
         {
           "competition": "Lega league 2020/2021",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 1
         }
@@ -7063,7 +7063,7 @@
     "Abiola": {
       "teams": {
         "Spectrum": 1,
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 1,
       "assists": 0,
@@ -7079,7 +7079,7 @@
         },
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "yellowCards",
           "val": 1
         }
@@ -7656,7 +7656,7 @@
     },
     "Tomiwa": {
       "teams": {
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 1,
       "assists": 0,
@@ -7664,7 +7664,7 @@
       "records": [
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "goals",
           "val": 1
         }
@@ -7746,7 +7746,7 @@
     },
     "Ileri": {
       "teams": {
-        "Philadelphia Fc": 1
+        "Philadelphia FC": 1
       },
       "goals": 0,
       "assists": 1,
@@ -7754,7 +7754,7 @@
       "records": [
         {
           "competition": "lega League Division 1 & 2",
-          "team": "Philadelphia Fc",
+          "team": "Philadelphia FC",
           "kind": "assists",
           "val": 1
         }

@@ -80,13 +80,25 @@ function parseCompetitorMatchText(text, self, map) {
   m = src.match(/^([A-Z][A-Z0-9]{1,5})(Home|Away)(.*?)(\d+)\s+--\s+(\d+)(Win|Loss|Tie)$/i);
   if (m) {
     const opponent = teamName(m[1], map);
-    const isHome = /^Home$/i.test(m[2]);
+    const side = m[2];
+    let dateText = m[3];
+    let hsText = m[4];
+    const as = Number(m[5]);
+    const result = m[6];
+    if (/GMT\+$/i.test(dateText) && hsText.length > 1) {
+      dateText += hsText.slice(0, -1);
+      hsText = hsText.slice(-1);
+    }
+    const hs = Number(hsText);
+    const isHome = /^Home$/i.test(side);
+    const selfGoals = /^Tie$/i.test(result) ? hs : (/^Win$/i.test(result) ? Math.max(hs, as) : Math.min(hs, as));
+    const oppGoals = /^Tie$/i.test(result) ? as : (/^Win$/i.test(result) ? Math.min(hs, as) : Math.max(hs, as));
     return {
-      date: String(m[3] || "").trim() || "No date",
+      date: String(dateText || "").trim() || "No date",
       home: isHome ? selfName : opponent,
       away: isHome ? opponent : selfName,
-      hs: Number(m[4]),
-      as: Number(m[5]),
+      hs: isHome ? selfGoals : oppGoals,
+      as: isHome ? oppGoals : selfGoals,
       status: "played",
       raw: src
     };
