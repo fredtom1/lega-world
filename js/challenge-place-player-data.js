@@ -1,7 +1,7 @@
-/* Generated from expanded Challenge Place player statistics. */
+/* Generated from expanded player statistics. */
 (function(){
   window.LEGA_CHALLENGE_PLAYER_DATA = {
-  "extractedAt": "2026-06-26T16:48:50.211Z",
+  "extractedAt": "2026-06-26T17:06:09.040Z",
   "byCompetition": {
     "Lega League ⚽": {
       "goals": [
@@ -15,7 +15,32 @@
     "Lega Shield": {},
     "Nolong cup 2022": {},
     "Soccer untitled": {},
-    "Lega League 2020 (corona)": {},
+    "Lega League 2020 (corona)": {
+      "goals": [
+        {
+          "name": "Origi",
+          "team": "Philadelphia FC",
+          "val": 11
+        },
+        {
+          "name": "Ay show",
+          "team": "Philadelphia FC",
+          "val": 11
+        }
+      ],
+      "deadBallGoals": [
+        {
+          "name": "Origi",
+          "team": "Philadelphia FC",
+          "val": 6
+        },
+        {
+          "name": "Tommy",
+          "team": "Nova fc",
+          "val": 4
+        }
+      ]
+    },
     "Lega League 2024": {},
     "Super league 2023": {},
     "Lega League 2023": {},
@@ -2889,6 +2914,200 @@
         }
       ]
     },
+    "Origi": {
+      "teams": {
+        "Philadelphia FC": 1,
+        "Golden Stars": 1
+      },
+      "goals": 25,
+      "assists": 2,
+      "extras": {
+        "deadBallGoals": 6
+      },
+      "records": [
+        {
+          "competition": "Lega League 2020 (corona)",
+          "team": "Philadelphia FC",
+          "kind": "goals",
+          "val": 11
+        },
+        {
+          "competition": "Lega League 2020 (corona)",
+          "team": "Philadelphia FC",
+          "kind": "deadBallGoals",
+          "val": 6
+        },
+        {
+          "competition": "Lega League 2022 A",
+          "team": "Golden Stars",
+          "kind": "goals",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2020/2021",
+          "team": "Golden Stars",
+          "kind": "goals",
+          "val": 4
+        },
+        {
+          "competition": "Lega League season 2021 B",
+          "team": "Golden Stars",
+          "kind": "goals",
+          "val": 6
+        },
+        {
+          "competition": "Lega League season 2021 B",
+          "team": "Golden Stars",
+          "kind": "assists",
+          "val": 2
+        },
+        {
+          "competition": "Super LEAGUE",
+          "team": "Golden Stars",
+          "kind": "goals",
+          "val": 3
+        }
+      ]
+    },
+    "Ay show": {
+      "teams": {
+        "Philadelphia FC": 1,
+        "MFM": 1,
+        "The Royals fc": 1
+      },
+      "goals": 15,
+      "assists": 3,
+      "extras": {
+        "penaltyGoals": 1
+      },
+      "records": [
+        {
+          "competition": "Lega League 2020 (corona)",
+          "team": "Philadelphia FC",
+          "kind": "goals",
+          "val": 11
+        },
+        {
+          "competition": "Lega League 2022 A",
+          "team": "MFM",
+          "kind": "assists",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2022 B",
+          "team": "The Royals fc",
+          "kind": "goals",
+          "val": 2
+        },
+        {
+          "competition": "Lega league 2022 B",
+          "team": "The Royals fc",
+          "kind": "assists",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2022 B",
+          "team": "The Royals fc",
+          "kind": "penaltyGoals",
+          "val": 1
+        },
+        {
+          "competition": "Gray cup 2022",
+          "team": "The Royals fc",
+          "kind": "goals",
+          "val": 2
+        },
+        {
+          "competition": "Gray cup 2022",
+          "team": "The Royals fc",
+          "kind": "assists",
+          "val": 1
+        }
+      ]
+    },
+    "Tommy": {
+      "teams": {
+        "Nova fc": 1,
+        "Fc Eagles": 1,
+        "The Royals fc": 1,
+        "Western boys": 1
+      },
+      "goals": 27,
+      "assists": 1,
+      "extras": {
+        "deadBallGoals": 4,
+        "yellowCards": 1,
+        "redCards": 1
+      },
+      "records": [
+        {
+          "competition": "Lega League 2020 (corona)",
+          "team": "Nova fc",
+          "kind": "deadBallGoals",
+          "val": 4
+        },
+        {
+          "competition": "Lega League 2022 A",
+          "team": "Fc Eagles",
+          "kind": "goals",
+          "val": 3
+        },
+        {
+          "competition": "Lega League 2022 A",
+          "team": "Fc Eagles",
+          "kind": "assists",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2022 B",
+          "team": "The Royals fc",
+          "kind": "goals",
+          "val": 2
+        },
+        {
+          "competition": "Gray cup 2022",
+          "team": "The Royals fc",
+          "kind": "goals",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2020/2021",
+          "team": "Nova fc",
+          "kind": "goals",
+          "val": 8
+        },
+        {
+          "competition": "Lega league 2020/2021",
+          "team": "Nova fc",
+          "kind": "yellowCards",
+          "val": 1
+        },
+        {
+          "competition": "Lega league 2020/2021",
+          "team": "Nova fc",
+          "kind": "redCards",
+          "val": 1
+        },
+        {
+          "competition": "Lega League season 2021 B",
+          "team": "Nova fc",
+          "kind": "goals",
+          "val": 5
+        },
+        {
+          "competition": "lega League Division 1 & 2",
+          "team": "Nova fc",
+          "kind": "goals",
+          "val": 3
+        },
+        {
+          "competition": "Super LEAGUE",
+          "team": "Western boys",
+          "kind": "goals",
+          "val": 5
+        }
+      ]
+    },
     "Tope": {
       "teams": {
         "Future Stars": 1,
@@ -3659,82 +3878,6 @@
           "team": "All Stars",
           "kind": "goals",
           "val": 2
-        }
-      ]
-    },
-    "Tommy": {
-      "teams": {
-        "Fc Eagles": 1,
-        "The Royals fc": 1,
-        "Nova fc": 1,
-        "Western boys": 1
-      },
-      "goals": 27,
-      "assists": 1,
-      "extras": {
-        "yellowCards": 1,
-        "redCards": 1
-      },
-      "records": [
-        {
-          "competition": "Lega League 2022 A",
-          "team": "Fc Eagles",
-          "kind": "goals",
-          "val": 3
-        },
-        {
-          "competition": "Lega League 2022 A",
-          "team": "Fc Eagles",
-          "kind": "assists",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2022 B",
-          "team": "The Royals fc",
-          "kind": "goals",
-          "val": 2
-        },
-        {
-          "competition": "Gray cup 2022",
-          "team": "The Royals fc",
-          "kind": "goals",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2020/2021",
-          "team": "Nova fc",
-          "kind": "goals",
-          "val": 8
-        },
-        {
-          "competition": "Lega league 2020/2021",
-          "team": "Nova fc",
-          "kind": "yellowCards",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2020/2021",
-          "team": "Nova fc",
-          "kind": "redCards",
-          "val": 1
-        },
-        {
-          "competition": "Lega League season 2021 B",
-          "team": "Nova fc",
-          "kind": "goals",
-          "val": 5
-        },
-        {
-          "competition": "lega League Division 1 & 2",
-          "team": "Nova fc",
-          "kind": "goals",
-          "val": 3
-        },
-        {
-          "competition": "Super LEAGUE",
-          "team": "Western boys",
-          "kind": "goals",
-          "val": 5
         }
       ]
     },
@@ -4662,46 +4805,6 @@
         }
       ]
     },
-    "Origi": {
-      "teams": {
-        "Golden Stars": 1
-      },
-      "goals": 14,
-      "assists": 2,
-      "extras": {},
-      "records": [
-        {
-          "competition": "Lega League 2022 A",
-          "team": "Golden Stars",
-          "kind": "goals",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2020/2021",
-          "team": "Golden Stars",
-          "kind": "goals",
-          "val": 4
-        },
-        {
-          "competition": "Lega League season 2021 B",
-          "team": "Golden Stars",
-          "kind": "goals",
-          "val": 6
-        },
-        {
-          "competition": "Lega League season 2021 B",
-          "team": "Golden Stars",
-          "kind": "assists",
-          "val": 2
-        },
-        {
-          "competition": "Super LEAGUE",
-          "team": "Golden Stars",
-          "kind": "goals",
-          "val": 3
-        }
-      ]
-    },
     "Paul": {
       "teams": {
         "Future Stars": 1
@@ -4947,55 +5050,6 @@
           "team": "Golden Stars",
           "kind": "assists",
           "val": 6
-        }
-      ]
-    },
-    "Ay show": {
-      "teams": {
-        "MFM": 1,
-        "The Royals fc": 1
-      },
-      "goals": 4,
-      "assists": 3,
-      "extras": {
-        "penaltyGoals": 1
-      },
-      "records": [
-        {
-          "competition": "Lega League 2022 A",
-          "team": "MFM",
-          "kind": "assists",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2022 B",
-          "team": "The Royals fc",
-          "kind": "goals",
-          "val": 2
-        },
-        {
-          "competition": "Lega league 2022 B",
-          "team": "The Royals fc",
-          "kind": "assists",
-          "val": 1
-        },
-        {
-          "competition": "Lega league 2022 B",
-          "team": "The Royals fc",
-          "kind": "penaltyGoals",
-          "val": 1
-        },
-        {
-          "competition": "Gray cup 2022",
-          "team": "The Royals fc",
-          "kind": "goals",
-          "val": 2
-        },
-        {
-          "competition": "Gray cup 2022",
-          "team": "The Royals fc",
-          "kind": "assists",
-          "val": 1
         }
       ]
     },

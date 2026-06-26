@@ -178,6 +178,32 @@ function build() {
     });
   });
 
+  const verifiedCorrections = {
+    "Lega League 2020 (corona)": {
+      goals: [
+        ["Origi", "Philadelphia FC", 11],
+        ["Ay show", "Philadelphia FC", 11]
+      ],
+      deadBallGoals: [
+        ["Origi", "Philadelphia FC", 6],
+        ["Tommy", "Nova fc", 4]
+      ]
+    }
+  };
+
+  Object.keys(verifiedCorrections).forEach((comp) => {
+    byComp[comp] = byComp[comp] || {};
+    Object.keys(verifiedCorrections[comp]).forEach((kind) => {
+      byComp[comp][kind] = byComp[comp][kind] || [];
+      verifiedCorrections[comp][kind].forEach(([name, team, val]) => {
+        const cleanTeam = canonTeam(team);
+        const existing = byComp[comp][kind].find((row) => row.name === name && canonTeam(row.team) === cleanTeam);
+        if (existing) existing.val = Math.max(Number(existing.val || 0), val);
+        else byComp[comp][kind].push({ name, team: cleanTeam, val });
+      });
+    });
+  });
+
   const playerTotals = {};
   Object.keys(byComp).forEach((competition) => {
     const stat = byComp[competition];
@@ -199,7 +225,7 @@ function build() {
 
 if (require.main === module) {
   const data = build();
-  const js = "/* Generated from expanded Challenge Place player statistics. */\n(function(){\n  window.LEGA_CHALLENGE_PLAYER_DATA = "
+  const js = "/* Generated from expanded player statistics. */\n(function(){\n  window.LEGA_CHALLENGE_PLAYER_DATA = "
     + JSON.stringify(data, null, 2) + ";\n})();\n";
   fs.writeFileSync(path.join(repo, "js", "challenge-place-player-data.js"), js);
   console.log(JSON.stringify({

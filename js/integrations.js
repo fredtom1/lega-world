@@ -31,6 +31,13 @@
     '<div style="font-size:11px;color:#A09AAE;font-weight:600;margin-top:5px;">Use this for player photos or existing profile links until full file uploads are connected.</div></div>';
 
   var template = window.LEGA_APP_TEMPLATE;
+  template = template
+    .replace(/a place in the archive/g, "a place in our records")
+    .replace(/A place in the archive\./g, "A place in our records.")
+    .replace(/15 seasons of the archive/g, "15 seasons of our records")
+    .replace(/recorded in the archive yet/g, "recorded in our records yet")
+    .replace(/Most prolific side in the archive/g, "Most prolific side in our records")
+    .replace(/From the Archive/g, "From Our Records");
   var MOBILE_STYLE = '<style>.lw-mobile-menu{display:none}.lw-mobile-drawer{display:none}@media(max-width:760px){.lw-mobile-menu{display:flex}.lw-public-nav{display:none!important}.lw-mobile-drawer{display:block}}</style>';
   template = MOBILE_STYLE + template;
   template = template.replace('<nav style="', '<nav class="lw-public-nav" style="');
@@ -96,7 +103,7 @@
   var H2H_DETAILS =
     '<div style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;align-items:start;">' +
       '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);overflow:hidden;">' +
-        '<div style="padding:20px 22px;background:#2C1545;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#F0B418;">Team-vs-team archive</div><div style="font-size:20px;font-weight:900;margin-top:4px;">{{ h2hA }} vs {{ h2hB }}</div></div><div style="font-size:12px;font-weight:800;color:#D7ECF7;">{{ h2hCompetitionCount }} competitions</div></div>' +
+        '<div style="padding:20px 22px;background:#2C1545;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#F0B418;">Team-vs-team record</div><div style="font-size:20px;font-weight:900;margin-top:4px;">{{ h2hA }} vs {{ h2hB }}</div></div><div style="font-size:12px;font-weight:800;color:#D7ECF7;">{{ h2hCompetitionCount }} competitions</div></div>' +
         '<div style="padding:18px 22px;"><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#5C5470;margin-bottom:10px;">Competition breakdown</div><sc-for list="{{ h2hCompetitionRows }}" as="r" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:1fr repeat(6,42px);gap:8px;align-items:center;border-top:1px solid #EEF4F4;padding:10px 0;font-size:12px;font-weight:800;color:#281F38;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.competition }}</span><span title="Played">{{ r.p }}</span><span style="color:#067C7C;" title="Wins">{{ r.w }}</span><span style="color:#A09AAE;" title="Draws">{{ r.d }}</span><span style="color:#C03048;" title="Losses">{{ r.l }}</span><span style="color:#48246C;" title="Goals for">{{ r.gf }}</span><span style="color:#5C5470;" title="Goals against">{{ r.ga }}</span></div></sc-for><sc-if value="{{ h2hNoCompetitionRows }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;text-align:center;color:#5C5470;font-weight:700;background:#FAFCFC;border-radius:16px;">No competition breakdown yet for this pair.</div></sc-if></div>' +
       '</div>' +
       '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:22px;box-shadow:0 1px 3px rgba(44,21,69,.08);padding:20px 22px;">' +
@@ -108,12 +115,12 @@
 
   var CLUB_DISCIPLINE =
     '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;padding:18px 22px;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#067C7C;">Team discipline</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Own goals, cards and free-kicks from the Challenge Place archive.</div></div><div style="font-size:12px;font-weight:900;color:#48246C;">{{ sClubDisciplineNote }}</div></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#067C7C;">Team discipline</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Own goals, cards and free-kicks from our records.</div></div><div style="font-size:12px;font-weight:900;color:#48246C;">{{ sClubDisciplineNote }}</div></div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;"><sc-for list="{{ sClubDisciplineRows }}" as="d" hint-placeholder-count="4"><div style="background:#FAFCFC;border:1px solid #E2ECEE;border-radius:14px;padding:14px;text-align:center;"><div style="font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;color:{{ d.color }};">{{ d.val }}</div><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#5C5470;margin-top:3px;">{{ d.label }}</div></div></sc-for></div>' +
     '</div>';
   var CLUB_MATCH_RECORD =
     '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;padding:18px 22px;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#48246C;">Team match record</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Played, wins, draws, losses and goals from recorded Challenge Place matches.</div></div><div style="font-size:12px;font-weight:900;color:#067C7C;">{{ sClubMatchNote }}</div></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#48246C;">Team match record</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Played, wins, draws, losses and goals from our recorded matches.</div></div><div style="font-size:12px;font-weight:900;color:#067C7C;">{{ sClubMatchNote }}</div></div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:12px;"><sc-for list="{{ sClubMatchCards }}" as="m" hint-placeholder-count="6"><div style="background:#FAFCFC;border:1px solid #E2ECEE;border-radius:14px;padding:14px;text-align:center;"><div style="font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;color:{{ m.color }};">{{ m.val }}</div><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#5C5470;margin-top:3px;">{{ m.label }}</div></div></sc-for></div>' +
     '</div>';
   var clubGaAnchor = '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;overflow:hidden;">\n        <div onClick="{{ toggleGa }}"';
@@ -124,8 +131,8 @@
     '<section style="background:#2C1545;color:#fff;">' +
       '<div style="max-width:1200px;margin:0 auto;padding:36px 22px 34px;">' +
         '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#90C0E4;">Fixtures & results</div>' +
-        '<h2 style="font-size:38px;font-weight:900;margin:8px 0 8px;letter-spacing:-.02em;">Matches archive</h2>' +
-        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Browse current fixtures, old seasons, matchweeks, results, and rivalry scorelines from the Lega archive.</p>' +
+        '<h2 style="font-size:38px;font-weight:900;margin:8px 0 8px;letter-spacing:-.02em;">Matches & results</h2>' +
+        '<p style="margin:0;color:#D7ECF7;font-weight:600;max-width:760px;line-height:1.6;">Browse current fixtures, old seasons, matchweeks, results, and rivalry scorelines from our records.</p>' +
       '</div>' +
     '</section>' +
     '<section style="max-width:1200px;margin:0 auto;padding:24px 22px 72px;">' +
@@ -245,7 +252,11 @@
     "Shedidlu Blessing": "Sheidu Blessing",
     "SHEDIDLU BLESSING": "Sheidu Blessing",
     "Oladele Blessing": "Oladele Ayomide",
-    "OLADELE BLESSING": "Oladele Ayomide"
+    "OLADELE BLESSING": "Oladele Ayomide",
+    "Ope (origi)": "Origi",
+    "OPE (ORIGI)": "Origi",
+    "Ope Origi": "Origi",
+    "OPE ORIGI": "Origi"
   };
   function canonPlayer(name) {
     var n = String(name || "").trim();
@@ -271,10 +282,19 @@
     }
     if (name === "Origi") {
       return {
-        teams: { "WINNERS Team": 1, "Golden Stars": 1 },
+        teams: { "Philadelphia FC": 1, "Golden Stars": 1 },
         deadBallGoals: 6,
         records: [
-          { competition: "Lega League 2020 (corona)", team: "WINNERS Team", kind: "deadBallGoals", val: 6, note: "Six free-kicks in the season, including two back-to-back free-kick goals in the first three matches" }
+          { competition: "Lega League 2020 (corona)", team: "Philadelphia FC", kind: "deadBallGoals", val: 6, note: "Six free-kicks in the season, including two back-to-back free-kick goals in the first three matches" }
+        ]
+      };
+    }
+    if (name === "Tommy") {
+      return {
+        teams: { "Nova fc": 1 },
+        deadBallGoals: 4,
+        records: [
+          { competition: "Lega League 2020 (corona)", team: "Nova fc", kind: "deadBallGoals", val: 4, note: "Four dead-ball goals in the 2020 Corona season" }
         ]
       };
     }
@@ -290,18 +310,25 @@
     app.positions.Ayo = "Goalkeeper";
     app.freeKickData.MFM = app.freeKickData.MFM || {};
     app.freeKickData.MFM.Ayo = Math.max(app.freeKickData.MFM.Ayo || 0, 3);
-    app.freeKickData["WINNERS Team"] = app.freeKickData["WINNERS Team"] || {};
-    app.freeKickData["WINNERS Team"].Origi = Math.max(app.freeKickData["WINNERS Team"].Origi || 0, 6);
+    app.freeKickData["Philadelphia FC"] = app.freeKickData["Philadelphia FC"] || {};
+    app.freeKickData["Philadelphia FC"].Origi = Math.max(app.freeKickData["Philadelphia FC"].Origi || 0, 6);
+    app.freeKickData["Nova fc"] = app.freeKickData["Nova fc"] || {};
+    app.freeKickData["Nova fc"].Tommy = Math.max(app.freeKickData["Nova fc"].Tommy || 0, 4);
   }
   function playerStatExtra(name) {
     name = canonPlayer(name);
-    var t = (challengePlayerData().playerTotals || {})[name];
-    if (!t) return null;
-    var ex = { teams: t.teams || {}, records: [] };
-    var extras = t.extras || {};
-    Object.keys(extras).forEach(function (key) { ex[key] = extras[key]; });
-    (t.records || []).forEach(function (r) {
-      if (r.kind !== "goals" && r.kind !== "assists") ex.records.push(r);
+    var totals = challengePlayerData().playerTotals || {};
+    var names = Object.keys(totals).filter(function (raw) { return canonPlayer(raw) === name; });
+    if (!names.length) return null;
+    var ex = { teams: {}, records: [] };
+    names.forEach(function (raw) {
+      var t = totals[raw] || {};
+      Object.keys(t.teams || {}).forEach(function (team) { ex.teams[canonTeam(team)] = 1; });
+      var extras = t.extras || {};
+      Object.keys(extras).forEach(function (key) { ex[key] = (ex[key] || 0) + Number(extras[key] || 0); });
+      (t.records || []).forEach(function (r) {
+        if (r.kind !== "goals" && r.kind !== "assists") ex.records.push(r);
+      });
     });
     return ex;
   }
@@ -343,11 +370,11 @@
     return Object.keys(keys);
   }
   function extraLine(ex) {
-    if (!ex) return "Challenge Place checked";
+    if (!ex) return "Our records checked";
     var total = (ex.ownGoals || 0) + (ex.yellowCards || 0) + (ex.redCards || 0) + (ex.deadBallGoals || 0);
     if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0);
     var teams = Object.keys(ex.teams || {});
-    return teams.length ? "Challenge roster: " + teams.map(teamLabel).join(" / ") : "Challenge Place checked";
+    return teams.length ? "Recorded teams: " + teams.map(teamLabel).join(" / ") : "Our records checked";
   }
   function playerXgEstimate(player, ex) {
     var goals = Number((player && player.goals) || 0);
@@ -390,7 +417,7 @@
         if (recordExists(player, rec)) return;
         player.recs.push({
           team: canonTeam(rec.team), val: rec.val, season: rec.competition, short: rec.competition,
-          league: "Challenge Place", order: 1000, kind: rec.kind
+          league: "Our records", order: 1000, kind: rec.kind
         });
         if (rec.kind === "goals") {
           player.goals = (player.goals || 0) + rec.val;
@@ -398,7 +425,7 @@
         } else {
           player.assists = (player.assists || 0) + rec.val;
         }
-        player.comps["Challenge Place"] = 1;
+        player.comps["Our records"] = 1;
         player.teams[canonTeam(rec.team)] = 1;
       });
     });
@@ -409,11 +436,11 @@
     if (missingAyoGoals > 0) {
       ayo.recs.push({
         team: "MFM", val: missingAyoGoals, season: "Manual free-kick record", short: "Manual record",
-        league: "Challenge Place", order: 1001, kind: "goals"
+        league: "Our records", order: 1001, kind: "goals"
       });
       ayo.goals = (ayo.goals || 0) + missingAyoGoals;
       ayo.seasons["Manual free-kick record"] = (ayo.seasons["Manual free-kick record"] || 0) + missingAyoGoals;
-      ayo.comps["Challenge Place"] = 1;
+      ayo.comps["Our records"] = 1;
       ayo.teams.MFM = 1;
     }
   }
@@ -474,7 +501,7 @@
         var ex = playerExtra(row.name);
         row.extraLine = ex
           ? "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0)
-          : "Challenge Place checked";
+          : "Our records checked";
         return row;
       });
     }
@@ -519,10 +546,10 @@
     }
     if (this.state.playerSel && o.pBioRows) {
       var ex = playerExtra(this.state.playerSel);
-      var hasTeams = o.pBioRows.some(function (row) { return row.label === "Challenge teams"; });
+      var hasTeams = o.pBioRows.some(function (row) { return row.label === "Recorded teams"; });
       if (ex && !hasTeams) {
         o.pBioRows = o.pBioRows.concat([
-          { label: "Challenge teams", val: Object.keys(ex.teams || {}).map(teamLabel).join(" / ") || "Unlisted" },
+          { label: "Recorded teams", val: Object.keys(ex.teams || {}).map(teamLabel).join(" / ") || "Unlisted" },
           { label: "xG estimate", val: playerXgEstimate(this.players[this.state.playerSel] || {}, ex) }
         ]);
       }
@@ -725,8 +752,8 @@
       (L.seasons || []).forEach(function (s) {
         if (s.allTime) return;
         var comp = L.name;
-        var season = s.name || s.short || "Archive";
-        var gw = s.short || "Archive";
+        var season = s.name || s.short || "Records";
+        var gw = s.short || "Records";
         function addPlayed(kind, m, idx) {
           rows.push({
             id: "archive:" + comp + ":" + season + ":" + kind + ":" + idx,
@@ -771,7 +798,7 @@
       return Object.assign({}, m, {
         home: canonTeam(m.home),
         away: canonTeam(m.away),
-        gameweek: String(m.gameweek || "").replace(/^MW/i, "GW") || "Archive"
+        gameweek: String(m.gameweek || "").replace(/^MW/i, "GW") || "Records"
       });
     });
     return currentFixtures().concat(archiveRows(this)).concat(cp);
@@ -818,7 +845,7 @@
     a = canonTeam(a);
     var out = {};
     pairRows(rows, a, b).forEach(function (m) {
-      var key = m.competition || "Archive";
+      var key = m.competition || "Records";
       var rec = out[key] || (out[key] = { competition: key, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, comps: {} });
       var home = canonTeam(m.home);
       var gf = home === a ? Number(m.hs) : Number(m.as);
@@ -836,8 +863,8 @@
         home: teamLabel(m.home),
         away: teamLabel(m.away),
         score: m.hs + "-" + m.as,
-        competition: m.competition || "Archive",
-        season: m.season || "Archive"
+        competition: m.competition || "Records",
+        season: m.season || "Records"
       };
     });
   }
@@ -851,7 +878,7 @@
       var rec = out[opponent] || (out[opponent] = { opponent: opponent, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, comps: {} });
       var gf = home === team ? Number(m.hs) : Number(m.as);
       var ga = home === team ? Number(m.as) : Number(m.hs);
-      addRecord(rec, gf, ga, m.competition || "Archive");
+      addRecord(rec, gf, ga, m.competition || "Records");
     });
     return Object.keys(out).map(function (opponent) {
       var rec = out[opponent];
@@ -884,7 +911,7 @@
     });
     rows.sort(function (a, b) { return b.goals - a.goals || a.name.localeCompare(b.name); });
     var cards = rows.slice(0, 3).map(function (r) {
-      return { big: String(r.goals), label: r.name + " goals for " + r.team, sub: "Player-team scoring record from the archive" };
+      return { big: String(r.goals), label: r.name + " goals for " + r.team, sub: "Player-team scoring record from our records" };
     });
     cards.push({ big: "3", label: "Ayo goalkeeper free-kicks for MFM", sub: "Goalkeeper scoring record" });
     cards.push({ big: "6", label: "Origi free-kicks in the 2020 Corona season", sub: "Two back-to-back free-kick goals in the first three matches" });
@@ -987,7 +1014,7 @@
     numericRows(rows).forEach(function (m) {
       var home = canonTeam(m.home), away = canonTeam(m.away);
       if (home !== team && away !== team) return;
-      var key = m.competition || "Archive";
+      var key = m.competition || "Records";
       var rec = out[key] || (out[key] = { competition: key, p: 0, w: 0, d: 0, l: 0 });
       var gf = home === team ? Number(m.hs) : Number(m.as);
       var ga = home === team ? Number(m.as) : Number(m.hs);
@@ -1025,9 +1052,9 @@
       score: isPlayed ? (m.hs + "-" + m.as) : (dt.time || "TBC"),
       displayDate: dt.date,
       time: dt.time,
-      competition: m.competition || "Archive",
-      season: m.season || "Archive",
-      gameweek: m.gameweek || "Archive",
+      competition: m.competition || "Records",
+      season: m.season || "Records",
+      gameweek: m.gameweek || "Records",
       status: status,
       statusBg: status === "Played" ? "#E6F4F1" : "#FFF4D6",
       statusColor: status === "Played" ? "#067C7C" : "#8A5A00"
@@ -1185,22 +1212,22 @@
     o.sClubFkTotal = String(cards.deadBallGoals);
     o.sClubOwnGoals = String(cards.ownGoals);
     o.sClubDisciplineRows = cards.rows;
-    o.sClubDisciplineNote = cards.ownGoals || cards.redCards || cards.yellowCards || cards.deadBallGoals ? "Challenge checked" : "No incidents logged";
+    o.sClubDisciplineNote = cards.ownGoals || cards.redCards || cards.yellowCards || cards.deadBallGoals ? "Our records checked" : "No incidents logged";
     var matchCards = clubMatchCards(all, club);
     o.sClubMatchCards = matchCards.rows;
-    o.sClubMatchNote = matchCards.record.p ? "Match archive checked" : "No matches logged";
+    o.sClubMatchNote = matchCards.record.p ? "Our records checked" : "No matches logged";
     o.sClubGoals = String(Math.max(safeNumber(o.sClubGoals), matchCards.record.gf));
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
-        { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
+        { big: "Records", label: "Most awarded-result wins", sub: "Tracked from our result notes" }
       ]);
     }
     if (o.sRecCards && !o.sRecCards.some(function (r) { return /own goals tracked/i.test(r.label || ""); })) {
       var discipline = challengeTeamDiscipline();
       var ownLeader = Object.keys(discipline).sort(function (a, b) { return (discipline[b].ownGoals || 0) - (discipline[a].ownGoals || 0); })[0] || "";
       var redLeader = Object.keys(discipline).sort(function (a, b) { return (discipline[b].redCards || 0) - (discipline[a].redCards || 0); })[0] || "";
-      if (ownLeader && discipline[ownLeader].ownGoals) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[ownLeader].ownGoals), label: "Own goals tracked: " + teamLabel(ownLeader), sub: "Challenge Place archive total" }]);
-      if (redLeader && discipline[redLeader].redCards) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[redLeader].redCards), label: "Red cards tracked: " + teamLabel(redLeader), sub: "Challenge Place archive total" }]);
+      if (ownLeader && discipline[ownLeader].ownGoals) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[ownLeader].ownGoals), label: "Own goals tracked: " + teamLabel(ownLeader), sub: "Our records total" }]);
+      if (redLeader && discipline[redLeader].redCards) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[redLeader].redCards), label: "Red cards tracked: " + teamLabel(redLeader), sub: "Our records total" }]);
     }
     if (o.sRecCards && !o.sRecCards.some(function (r) { return /goalkeeper free-kicks/i.test(r.label || ""); })) {
       o.sRecCards = o.sRecCards.concat(playerRecordCards(this));
@@ -1220,6 +1247,21 @@
         style: "cursor:pointer;padding:8px 12px;border-radius:999px;font-weight:" + (on ? 700 : 600) + ";font-size:13px;white-space:nowrap;color:" + (on ? "#fff" : "#5C5470") + ";background:" + (on ? "#48246C" : "transparent") + ";transition:background .2s;"
       };
     }, this);
+    ["newsTop", "news", "sRecCards"].forEach(function (key) {
+      if (!Array.isArray(o[key])) return;
+      o[key] = o[key].map(function (row) {
+        var clean = Object.assign({}, row);
+        ["cat", "title", "sub", "label"].forEach(function (field) {
+          if (typeof clean[field] === "string") {
+            clean[field] = clean[field]
+              .replace(/From the Archive/g, "From Our Records")
+              .replace(/the archive/g, "our records")
+              .replace(/archive/g, "our records");
+          }
+        });
+        return clean;
+      });
+    });
     o.isMatches = v === "matches";
     o.goMatches = function () { this.go("matches"); }.bind(this);
     o.goStatsH2H = function () { this.setState({ view: "stats", statTab: "h2h", mobileMenuOpen: false }); }.bind(this);
