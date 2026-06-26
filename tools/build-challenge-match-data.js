@@ -19,7 +19,7 @@ function acronymMap(comp) {
     NOV: "Nova fc",
     NOVF: "Nova fc",
     WNT: "WINNERS Team",
-    PHIF: "Philadelphia Fc",
+    PHIF: "Philadelphia FC",
     ALL: "All Stars",
     BAR: "Barnet FC",
     GROS: "Growing stars",
@@ -36,9 +36,9 @@ function acronymMap(comp) {
     if (/MFM/i.test(name)) map.MFM = name;
     if (/WINNERS/i.test(name)) map.WNT = name;
     if (/Nova/i.test(name)) { map.NOV = name; map.NOVF = name; }
-    if (/Philadelphia/i.test(name)) map.PHIF = name;
+    if (/Philadelphia|Philapedia/i.test(name)) map.PHIF = "Philadelphia FC";
     if (/All Stars/i.test(name)) map.ALL = name;
-    if (/Barnet/i.test(name)) map.BAR = name;
+    if (/Barnet|Barent/i.test(name)) map.BAR = "Barnet FC";
     if (/Growing/i.test(name)) map.GROS = name;
     if (/Starlight/i.test(name)) map.STAR = name;
     if (/OBC/i.test(name)) map.OBC = name;
@@ -55,7 +55,8 @@ function teamName(code, map) {
     .replace(/\s+No players$/i, "")
     .trim();
   if (/^OBC(?:\s+FC)?$/i.test(cleaned)) return "OBC";
-  if (/^Barnet\s+F\.?C$/i.test(cleaned)) return "Barnet FC";
+  if (/^(Barnet|Barent)\s+F\.?C?s?$/i.test(cleaned)) return "Barnet FC";
+  if (/^(Philadelphia|Philapedia)\s+F\.?C$/i.test(cleaned)) return "Philadelphia FC";
   if (/^TEA\d+$/i.test(cleaned) || /^Team of the year\s+TEA\d+$/i.test(cleaned)) return "Team of the year";
   return cleaned;
 }

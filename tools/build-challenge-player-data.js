@@ -48,6 +48,15 @@ function isStop(s) {
   return stopWords.has(s);
 }
 
+function canonTeam(team) {
+  const t = String(team || "").trim();
+  if (/^OBC(?:\s+FC)?$/i.test(t)) return "OBC";
+  if (/^(Barnet|Barent)\s+F\.?C?s?$/i.test(t)) return "Barnet FC";
+  if (/^(Philadelphia|Philapedia)\s+F\.?C$/i.test(t)) return "Philadelphia FC";
+  if (/^PHIF$/i.test(t)) return "Philadelphia FC";
+  return t;
+}
+
 function parseSection(arr, start) {
   const kind = kindMap[arr[start]];
   const rows = [];
@@ -61,7 +70,7 @@ function parseSection(arr, start) {
     if (i >= arr.length || isStop(arr[i])) break;
     const name = arr[i++];
     if (i >= arr.length || isStop(arr[i])) break;
-    const team = arr[i++];
+    const team = canonTeam(arr[i++]);
     if (i >= arr.length || isStop(arr[i])) break;
     const val = Number(arr[i]);
     if (Number.isFinite(val)) {

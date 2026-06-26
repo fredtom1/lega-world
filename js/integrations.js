@@ -106,6 +106,14 @@
   var h2hAnchor = '<sc-if value="{{ h2hNoMeetings }}" hint-placeholder-val="{{ false }}">';
   if (template.indexOf(h2hAnchor) >= 0) template = template.replace(h2hAnchor, H2H_DETAILS + h2hAnchor);
 
+  var CLUB_DISCIPLINE =
+    '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;padding:18px 22px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#067C7C;">Team discipline</div><div style="font-size:13px;font-weight:700;color:#5C5470;margin-top:3px;">Own goals, cards and free-kicks from the Challenge Place archive.</div></div><div style="font-size:12px;font-weight:900;color:#48246C;">{{ sClubDisciplineNote }}</div></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;"><sc-for list="{{ sClubDisciplineRows }}" as="d" hint-placeholder-count="4"><div style="background:#FAFCFC;border:1px solid #E2ECEE;border-radius:14px;padding:14px;text-align:center;"><div style="font-size:28px;font-weight:300;font-variant-numeric:tabular-nums;color:{{ d.color }};">{{ d.val }}</div><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#5C5470;margin-top:3px;">{{ d.label }}</div></div></sc-for></div>' +
+    '</div>';
+  var clubGaAnchor = '<div style="background:#fff;border:1px solid #E2ECEE;border-radius:18px;box-shadow:0 1px 3px rgba(44,21,69,.08);margin-bottom:14px;overflow:hidden;">\n        <div onClick="{{ toggleGa }}"';
+  if (template.indexOf(clubGaAnchor) >= 0) template = template.replace(clubGaAnchor, CLUB_DISCIPLINE + clubGaAnchor);
+
   var MATCHES_PAGE =
     '<sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">' +
     '<section style="background:#2C1545;color:#fff;">' +
@@ -228,7 +236,11 @@
   }
   var PLAYER_ALIASES = {
     "Raphael Ndubuidu": "Raphel Ndubuidu",
-    "RAPHAEL NDUBUIDU": "Raphel Ndubuidu"
+    "RAPHAEL NDUBUIDU": "Raphel Ndubuidu",
+    "Shedidlu Blessing": "Sheidu Blessing",
+    "SHEDIDLU BLESSING": "Sheidu Blessing",
+    "Oladele Blessing": "Oladele Ayomide",
+    "OLADELE BLESSING": "Oladele Ayomide"
   };
   function canonPlayer(name) {
     var n = String(name || "").trim();
@@ -261,6 +273,12 @@
         ]
       };
     }
+    if (name === "Sheidu Blessing") {
+      return { teams: { "Golden Stars": 1 }, aliases: ["Shedidlu Blessing"] };
+    }
+    if (name === "Oladele Ayomide") {
+      return { teams: { "Golden Stars": 1 }, aliases: ["Oladele Blessing"] };
+    }
     return null;
   }
   function applyManualRecords(app) {
@@ -286,7 +304,7 @@
     if (!base && !patch) return null;
     var out = { teams: {}, records: [] };
     [base || {}, patch || {}].forEach(function (src) {
-      Object.keys(src.teams || {}).forEach(function (team) { out.teams[team] = 1; });
+      Object.keys(src.teams || {}).forEach(function (team) { out.teams[canonTeam(team)] = 1; });
       ["ownGoals", "yellowCards", "redCards", "penaltyGoals", "penaltiesMissed", "deadBallGoals", "fouls", "cornerKicks", "offsides"].forEach(function (key) {
         out[key] = Math.max(out[key] || 0, src[key] || 0);
       });
@@ -335,6 +353,7 @@
   function addRosterName(rosters, team, name) {
     if (!team || !name) return;
     name = canonPlayer(name);
+    team = canonTeam(team);
     rosters[team] = rosters[team] || [];
     if (rosters[team].indexOf(name) < 0) rosters[team].push(name);
   }
@@ -359,13 +378,13 @@
     Object.keys(totals).forEach(function (rawName) {
       var name = canonPlayer(rawName);
       var t = totals[rawName];
-      var teams = Object.keys(t.teams || {});
+      var teams = Object.keys(t.teams || {}).map(canonTeam);
       var player = ensurePlayer(app.players, name, teams[0] || "Unlisted");
       (t.records || []).forEach(function (rec) {
         if (rec.kind !== "goals" && rec.kind !== "assists") return;
         if (recordExists(player, rec)) return;
         player.recs.push({
-          team: rec.team, val: rec.val, season: rec.competition, short: rec.competition,
+          team: canonTeam(rec.team), val: rec.val, season: rec.competition, short: rec.competition,
           league: "Challenge Place", order: 1000, kind: rec.kind
         });
         if (rec.kind === "goals") {
@@ -375,7 +394,7 @@
           player.assists = (player.assists || 0) + rec.val;
         }
         player.comps["Challenge Place"] = 1;
-        player.teams[rec.team] = 1;
+        player.teams[canonTeam(rec.team)] = 1;
       });
     });
   }
@@ -519,7 +538,8 @@
     var base = t.replace(/\d+$/, "");
     if (t === "Fly Eagles") return "Fc Eagles";
     if (/^OBC(?:\s+FC)?$/i.test(t) || /^Obc(?:\s+FC)?$/i.test(t)) return "OBC";
-    if (/^Barnet\s+F\.?C$/i.test(t)) return "Barnet FC";
+    if (/^(Barnet|Barent)\s+F\.?C?s?$/i.test(t)) return "Barnet FC";
+    if (/^(Philadelphia|Philapedia)\s+F\.?C$/i.test(t)) return "Philadelphia FC";
     if (/^TEA\d+$/i.test(t) || /^Team of the year\s+TEA\d+$/i.test(t)) return "Team of the year";
     if (/^DYN$/i.test(base)) return "Dynamo FC";
     if (/^(GST|GSF)$/i.test(base)) return "Golden Stars";
@@ -527,10 +547,32 @@
     if (/^BAR$/i.test(base)) return "Barnet FC";
     if (/^WNT$/i.test(base)) return "WINNERS Team";
     if (/^(NOV|NOVF)$/i.test(base)) return "Nova fc";
-    if (/^PHIF$/i.test(base)) return "Philadelphia Fc";
+    if (/^PHIF$/i.test(base)) return "Philadelphia FC";
     if (/^GROS$/i.test(base)) return "Growing stars";
     return t;
   }
+  function uniqueCanonTeams(values) {
+    var seen = {};
+    return (values || []).map(canonTeam).filter(function (team) {
+      if (!team || seen[team]) return false;
+      seen[team] = 1;
+      return true;
+    }).sort(function (a, b) { return teamLabel(a).localeCompare(teamLabel(b)); });
+  }
+  var origClubsValsCanon = proto.clubsVals;
+  proto.clubsVals = function () {
+    var o = origClubsValsCanon.call(this);
+    var teams = uniqueCanonTeams((o.clubTeamList || []).concat(Object.keys(this.rosters || {})));
+    var sel = canonTeam(this.state.clubTeam || o.clubSelValue || teams[0] || "");
+    o.clubTeamList = teams;
+    o.clubTeams = teams.map(function (team) {
+      return { name: teamLabel(team), go: function () { this.setState({ clubTeam: team }); }.bind(this), active: team === sel, style: this.chipStyle(team === sel) };
+    }, this);
+    o.clubSelValue = sel;
+    o.clubSel = teamLabel(sel);
+    o.onClubTeam = function (e) { this.setState({ clubTeam: canonTeam(e.target.value) }); }.bind(this);
+    return o;
+  };
   function seasonSort(a, b) {
     return String(b).localeCompare(String(a), undefined, { numeric: true });
   }
@@ -843,6 +885,51 @@
     cards.push({ big: "6", label: "Origi free-kicks in the 2020 Corona season", sub: "Two back-to-back free-kick goals in the first three matches" });
     return cards;
   }
+  function addTeamStat(out, team, key, val) {
+    team = canonTeam(team);
+    out[team] = out[team] || { ownGoals: 0, redCards: 0, yellowCards: 0, deadBallGoals: 0 };
+    out[team][key] = (out[team][key] || 0) + Number(val || 0);
+  }
+  function challengeTeamDiscipline() {
+    var out = {};
+    var totals = challengePlayerData().playerTotals || {};
+    Object.keys(totals).forEach(function (name) {
+      var t = totals[name] || {};
+      (t.records || []).forEach(function (rec) {
+        if (rec.kind === "goals" || rec.kind === "assists") return;
+        if (["ownGoals", "redCards", "yellowCards", "deadBallGoals"].indexOf(rec.kind) < 0) return;
+        addTeamStat(out, rec.team, rec.kind, rec.val);
+      });
+    });
+    addTeamStat(out, "Philadelphia FC", "ownGoals", 1);
+    return out;
+  }
+  function maxTotal(rows) {
+    return (rows || []).reduce(function (n, row) { return n + Number(row.val || 0); }, 0);
+  }
+  function safeNumber(val) {
+    var n = Number(val);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function disciplineCards(team, redTotal, yellowTotal, fkTotal) {
+    var discipline = challengeTeamDiscipline()[canonTeam(team)] || {};
+    var own = Number(discipline.ownGoals || 0);
+    var red = Math.max(safeNumber(redTotal), safeNumber(discipline.redCards));
+    var yellow = Math.max(safeNumber(yellowTotal), safeNumber(discipline.yellowCards));
+    var fk = Math.max(safeNumber(fkTotal), safeNumber(discipline.deadBallGoals));
+    return {
+      ownGoals: own,
+      redCards: red,
+      yellowCards: yellow,
+      deadBallGoals: fk,
+      rows: [
+        { label: "Own goals", val: String(own), color: "#C03048" },
+        { label: "Red cards", val: String(red), color: "#E8607A" },
+        { label: "Yellow cards", val: String(yellow), color: "#F0B418" },
+        { label: "Free-kicks", val: String(fk), color: "#067C7C" }
+      ]
+    };
+  }
   function teamRecord(rows, team) {
     team = canonTeam(team);
     var rec = { p: 0, w: 0, d: 0, l: 0 };
@@ -1053,10 +1140,27 @@
     o.h2hNoMatchRows = matchRows.length === 0;
     o.h2hOpponentRows = oppRows;
     o.h2hAllOpponents = String(oppRows.length);
+    var club = canonTeam(this.state.clubTeam || o.sClubValue || o.sClub || "");
+    var cards = disciplineCards(club, o.sClubRedTotal || maxTotal(o.sClubRedRows), o.sClubYellow, o.sClubFkTotal || maxTotal(o.sClubFkRows));
+    o.sClub = teamLabel(club);
+    o.sClubValue = club;
+    o.sClubRedTotal = String(cards.redCards);
+    o.sClubYellow = String(cards.yellowCards);
+    o.sClubFkTotal = String(cards.deadBallGoals);
+    o.sClubOwnGoals = String(cards.ownGoals);
+    o.sClubDisciplineRows = cards.rows;
+    o.sClubDisciplineNote = cards.ownGoals || cards.redCards || cards.yellowCards || cards.deadBallGoals ? "Challenge checked" : "No incidents logged";
     if (o.sRecCards && !o.sRecCards.some(function (r) { return r.label === "Most awarded-result wins"; })) {
       o.sRecCards = o.sRecCards.concat([
         { big: "Archive", label: "Most awarded-result wins", sub: "Tracked internally from Challenge Place result notes" }
       ]);
+    }
+    if (o.sRecCards && !o.sRecCards.some(function (r) { return /own goals tracked/i.test(r.label || ""); })) {
+      var discipline = challengeTeamDiscipline();
+      var ownLeader = Object.keys(discipline).sort(function (a, b) { return (discipline[b].ownGoals || 0) - (discipline[a].ownGoals || 0); })[0] || "";
+      var redLeader = Object.keys(discipline).sort(function (a, b) { return (discipline[b].redCards || 0) - (discipline[a].redCards || 0); })[0] || "";
+      if (ownLeader && discipline[ownLeader].ownGoals) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[ownLeader].ownGoals), label: "Own goals tracked: " + teamLabel(ownLeader), sub: "Challenge Place archive total" }]);
+      if (redLeader && discipline[redLeader].redCards) o.sRecCards = o.sRecCards.concat([{ big: String(discipline[redLeader].redCards), label: "Red cards tracked: " + teamLabel(redLeader), sub: "Challenge Place archive total" }]);
     }
     if (o.sRecCards && !o.sRecCards.some(function (r) { return /goalkeeper free-kicks/i.test(r.label || ""); })) {
       o.sRecCards = o.sRecCards.concat(playerRecordCards(this));
