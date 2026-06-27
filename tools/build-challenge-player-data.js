@@ -5,6 +5,8 @@ const repo = path.resolve(__dirname, "..");
 const raw = JSON.parse(fs.readFileSync(path.join(repo, "challenge-place-extract.json"), "utf8"));
 const expanded = JSON.parse(fs.readFileSync(path.join(repo, "challenge-place-player-stats-expanded.json"), "utf8")).stats || [];
 const original = JSON.parse(fs.readFileSync(path.join(repo, "challenge-place-player-stats.json"), "utf8")).stats || [];
+const livePath = path.join(repo, "challenge-place-player-live.json");
+const live = fs.existsSync(livePath) ? JSON.parse(fs.readFileSync(livePath, "utf8")) : null;
 
 const sections = [
   "Top scorers", "Goals", "Assists", "Own goals", "Yellow cards", "Red cards",
@@ -26,6 +28,21 @@ const kindMap = {
   "Corner kicks": "cornerKicks",
   "Offsides": "offsides",
   "Goals conceded": "goalsConceded"
+};
+const liveKindMap = {
+  goal: "goals",
+  assist: "assists",
+  ownGoal: "ownGoals",
+  yellowCard: "yellowCards",
+  redCard: "redCards",
+  penalty: "penaltyGoals",
+  penaltyGoal: "penaltyGoals",
+  penaltyMissed: "penaltiesMissed",
+  stillGoal: "deadBallGoals",
+  fault: "fouls",
+  corner: "cornerKicks",
+  offside: "offsides",
+  goalConceded: "goalsConceded"
 };
 const stopWords = new Set([
   ...sections, "Dashboard", "Statistics", "TEAM", "PLAYER", "Filter", "MINIMIZE",
@@ -116,6 +133,67 @@ function bestRows(expandedRows, originalRows) {
   return dedupeRows(e.length >= o.length ? e : o);
 }
 
+function addStatRow(out, kind, row) {
+  out[kind] = out[kind] || [];
+  out[kind].push(row);
+}
+
+function sortRows(rows) {
+  return (rows || []).slice().sort((a, b) => {
+    return Number(b.val || 0) - Number(a.val || 0)
+      || String(a.name || "").localeCompare(String(b.name || ""))
+      || String(a.team || "").localeCompare(String(b.team || ""));
+  });
+}
+
+function rowsFromLiveCompetition(comp) {
+  const out = {};
+  const isAggregate = comp.href === "/c/lega-league-2";
+  (comp.players || []).forEach((player) => {
+    Object.keys(player.stats || {}).forEach((sourceKey) => {
+      const kind = liveKindMap[sourceKey];
+      if (!kind) return;
+      if (isAggregate && kind !== "goals") return;
+      const val = Number(player.stats[sourceKey] || 0);
+      if (!Number.isFinite(val) || val <= 0) return;
+      const row = { name: player.name, team: canonTeam(player.team), val };
+      if (isAggregate) row.aggregate = "legaLeagueAllTime";
+      addStatRow(out, kind, row);
+    });
+  });
+  Object.keys(out).forEach((kind) => {
+    out[kind] = sortRows(dedupeRows(out[kind]));
+  });
+  return out;
+}
+
+function applyLiveRows(byComp) {
+  ((live && live.competitions) || []).forEach((comp) => {
+    const liveRows = rowsFromLiveCompetition(comp);
+    if (!Object.keys(liveRows).length) return;
+    byComp[comp.name] = byComp[comp.name] || {};
+    Object.keys(liveRows).forEach((kind) => {
+      byComp[comp.name][kind] = liveRows[kind];
+    });
+  });
+}
+
+function mergeCorrectionRows(byComp, corrections) {
+  Object.keys(corrections).forEach((comp) => {
+    byComp[comp] = byComp[comp] || {};
+    Object.keys(corrections[comp]).forEach((kind) => {
+      byComp[comp][kind] = byComp[comp][kind] || [];
+      corrections[comp][kind].forEach(([name, team, val]) => {
+        const cleanTeam = canonTeam(team);
+        const existing = byComp[comp][kind].find((row) => row.name === name && canonTeam(row.team) === cleanTeam);
+        if (existing) existing.val = Math.max(Number(existing.val || 0), val);
+        else byComp[comp][kind].push({ name, team: cleanTeam, val });
+      });
+      byComp[comp][kind] = sortRows(dedupeRows(byComp[comp][kind]));
+    });
+  });
+}
+
 function build() {
   const byComp = {};
   raw.competitions.forEach((comp) => {
@@ -178,6 +256,8 @@ function build() {
     });
   });
 
+  applyLiveRows(byComp);
+
   const verifiedCorrections = {
     "Lega League 2020 (corona)": {
       goals: [
@@ -209,23 +289,25 @@ function build() {
     const stat = byComp[competition];
     Object.keys(stat).forEach((kind) => {
       stat[kind].forEach((row) => {
+        if (row.aggregate) return;
         const name = row.name;
         playerTotals[name] = playerTotals[name] || { teams: {}, goals: 0, assists: 0, extras: {}, records: [] };
         playerTotals[name].teams[row.team] = 1;
         if (kind === "goals") playerTotals[name].goals += row.val;
         else if (kind === "assists") playerTotals[name].assists += row.val;
         else playerTotals[name].extras[kind] = (playerTotals[name].extras[kind] || 0) + row.val;
-        playerTotals[name].records.push({ competition, team: row.team, kind, val: row.val });
+        const rec = { competition, team: row.team, kind, val: row.val };
+        playerTotals[name].records.push(rec);
       });
     });
   });
 
-  return { extractedAt: new Date().toISOString(), byCompetition: byComp, playerTotals };
+  return { extractedAt: (live && live.extractedAt) || new Date().toISOString(), byCompetition: byComp, playerTotals };
 }
 
 if (require.main === module) {
   const data = build();
-  const js = "/* Generated from expanded player statistics. */\n(function(){\n  window.LEGA_CHALLENGE_PLAYER_DATA = "
+  const js = "/* Generated from Challenge Place player statistics. */\n(function(){\n  window.LEGA_CHALLENGE_PLAYER_DATA = "
     + JSON.stringify(data, null, 2) + ";\n})();\n";
   fs.writeFileSync(path.join(repo, "js", "challenge-place-player-data.js"), js);
   console.log(JSON.stringify({

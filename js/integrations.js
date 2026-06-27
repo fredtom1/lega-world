@@ -347,7 +347,7 @@
     var out = { teams: {}, records: [] };
     [base || {}, patch || {}].forEach(function (src) {
       Object.keys(src.teams || {}).forEach(function (team) { out.teams[canonTeam(team)] = 1; });
-      ["ownGoals", "yellowCards", "redCards", "penaltyGoals", "penaltiesMissed", "deadBallGoals", "fouls", "cornerKicks", "offsides"].forEach(function (key) {
+      ["ownGoals", "yellowCards", "redCards", "penaltyGoals", "penaltiesMissed", "deadBallGoals", "goalsConceded", "fouls", "cornerKicks", "offsides"].forEach(function (key) {
         out[key] = Math.max(out[key] || 0, src[key] || 0);
       });
       (src.records || []).forEach(function (r) {
@@ -381,8 +381,8 @@
   }
   function extraLine(ex) {
     if (!ex) return "Our records checked";
-    var total = (ex.ownGoals || 0) + (ex.yellowCards || 0) + (ex.redCards || 0) + (ex.deadBallGoals || 0);
-    if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0);
+    var total = (ex.ownGoals || 0) + (ex.yellowCards || 0) + (ex.redCards || 0) + (ex.deadBallGoals || 0) + (ex.goalsConceded || 0);
+    if (total > 0) return "OG " + (ex.ownGoals || 0) + " · YC " + (ex.yellowCards || 0) + " · RC " + (ex.redCards || 0) + " · FK " + (ex.deadBallGoals || 0) + " · GC " + (ex.goalsConceded || 0);
     var teams = Object.keys(ex.teams || {});
     return teams.length ? "Recorded teams: " + teams.map(teamLabel).join(" / ") : "Our records checked";
   }
@@ -523,13 +523,16 @@
           { label: "Own goals", val: ex.ownGoals || 0 },
           { label: "Yellow cards", val: ex.yellowCards || 0 },
           { label: "Red cards", val: ex.redCards || 0 },
-          { label: "Dead-ball goals", val: ex.deadBallGoals || 0 }
+          { label: "Dead-ball goals", val: ex.deadBallGoals || 0 },
+          { label: "Goals conceded", val: ex.goalsConceded || 0 },
+          { label: "Fouls", val: ex.fouls || 0 },
+          { label: "Corner kicks", val: ex.cornerKicks || 0 }
         ]);
         o.pChallengeRows = (ex.records || []).map(function (r) {
           var labels = {
             ownGoals: "Own goal", yellowCards: "Yellow card", redCards: "Red card",
             deadBallGoals: "Dead-ball goal", penaltyGoals: "Penalty goal",
-            penaltiesMissed: "Penalty missed", fouls: "Foul", cornerKicks: "Corner",
+            goalsConceded: "Goal conceded", penaltiesMissed: "Penalty missed", fouls: "Foul", cornerKicks: "Corner",
             offsides: "Offside"
           };
           return { label: labels[r.kind] || r.kind, val: r.val, team: r.team, comp: r.competition };
