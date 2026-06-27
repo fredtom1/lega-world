@@ -981,6 +981,52 @@
     addTeamStat(out, "Philadelphia FC", "ownGoals", 1);
     return out;
   }
+  function rankedStatRows(values) {
+    return Object.keys(values || {}).map(function (name) {
+      return { name: name, val: Number(values[name] || 0) };
+    }).filter(function (row) {
+      return row.val > 0;
+    }).sort(function (a, b) {
+      return b.val - a.val || a.name.localeCompare(b.name);
+    }).map(function (row, idx) {
+      return { rank: idx + 1, name: row.name, val: row.val };
+    });
+  }
+  function statRowsTotal(rows) {
+    return (rows || []).reduce(function (sum, row) { return sum + Number(row.val || 0); }, 0);
+  }
+  function challengePlayerTeams() {
+    var teams = [];
+    var totals = challengePlayerData().playerTotals || {};
+    Object.keys(totals).forEach(function (rawName) {
+      var t = totals[rawName] || {};
+      Object.keys(t.teams || {}).forEach(function (team) { teams.push(canonTeam(team)); });
+      (t.records || []).forEach(function (rec) { teams.push(canonTeam(rec.team)); });
+    });
+    return uniqueCanonTeams(teams);
+  }
+  function challengeClubPlayerRows(team, kind) {
+    team = canonTeam(team);
+    var totals = challengePlayerData().playerTotals || {};
+    var values = {};
+    var seen = {};
+    Object.keys(totals).forEach(function (rawName) {
+      var name = canonPlayer(rawName);
+      var t = totals[rawName] || {};
+      (t.records || []).forEach(function (rec) {
+        if (rec.kind !== kind) return;
+        var cleanTeam = canonTeam(rec.team);
+        if (cleanTeam !== team) return;
+        var val = Number(rec.val || 0);
+        if (!Number.isFinite(val) || val <= 0) return;
+        var sig = [name, cleanTeam, String(rec.competition || "").toLowerCase(), kind, val].join("|");
+        if (seen[sig]) return;
+        seen[sig] = 1;
+        values[name] = (values[name] || 0) + val;
+      });
+    });
+    return rankedStatRows(values);
+  }
   function maxTotal(rows) {
     return (rows || []).reduce(function (n, row) { return n + Number(row.val || 0); }, 0);
   }
@@ -1245,9 +1291,28 @@
     o.h2hAllOpponents = String(oppRows.length);
     if (actualTeamGoals.length) o.sTeamGoalsLB = actualTeamGoals;
     var club = canonTeam(this.state.clubTeam || o.sClubValue || o.sClub || "");
+    var clubGoalRows = challengeClubPlayerRows(club, "goals");
+    var clubAssistRows = challengeClubPlayerRows(club, "assists");
+    if (Array.isArray(o.sClubOptions)) {
+      o.sClubOptions = uniqueCanonTeams(o.sClubOptions.concat(teamsFromMatches).concat(challengePlayerTeams()));
+    }
     var cards = disciplineCards(club, o.sClubRedTotal || maxTotal(o.sClubRedRows), o.sClubYellow, o.sClubFkTotal || maxTotal(o.sClubFkRows));
     o.sClub = teamLabel(club);
     o.sClubValue = club;
+    o.onClubSelect = function (e) { this.setState({ clubTeam: canonTeam(e.target.value) }); }.bind(this);
+    if (clubGoalRows.length) {
+      o.sClubGoalsRows = clubGoalRows;
+      o.sClubTop = clubGoalRows.slice(0, 5);
+      o.sClubHasTop = true;
+      o.sClubHasGoals = true;
+      o.sClubNoGoals = false;
+    }
+    if (clubAssistRows.length) {
+      o.sClubAssistRows = clubAssistRows;
+      o.sClubAssistTotal = String(statRowsTotal(clubAssistRows));
+      o.sClubHasAssists = true;
+      o.sClubNoAssists = false;
+    }
     o.sClubRedTotal = String(cards.redCards);
     o.sClubYellow = String(cards.yellowCards);
     o.sClubFkTotal = String(cards.deadBallGoals);
@@ -1258,6 +1323,7 @@
     o.sClubMatchCards = matchCards.rows;
     o.sClubMatchNote = matchCards.record.p ? "Our records checked" : "No matches logged";
     o.sClubGoals = matchCards.record.p ? String(matchCards.record.gf) : String(safeNumber(o.sClubGoals));
+    if (clubGoalRows.length) o.sClubGoals = String(statRowsTotal(clubGoalRows));
     if (o.sRecCards && actualTeamGoals.length) {
       o.sRecCards = o.sRecCards.map(function (card) {
         if (/all-time Lega League goals/i.test(card.label || "")) {
